@@ -22,9 +22,9 @@ export default function Register() {
       email: email,
       password: password
     }
-    navigate("/mansion") // <-- delete this once you have back end routes
-    axios.post('/api/register', body)
+    await axios.post('/api/post_register', body)
     .then((res) => {
+      console.log(`res`, res.data)
       if (res.data.success) {
 
         dispatch({

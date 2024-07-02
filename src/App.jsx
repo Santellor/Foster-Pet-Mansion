@@ -1,5 +1,6 @@
 import { Outlet, useNavigate } from 'react-router-dom'
 import './index.css'
+import axios from 'axios'
 
 import { useSelector, useDispatch } from 'react-redux'
 import { useState, useEffect } from 'react'
@@ -11,7 +12,7 @@ export default function App() {
 
 // global session check function
   const sessionCheck = async () => {
-    const res = await axios.get('/api/session-check')
+    const res = await axios.get('/api/get_session_check')
 
     if (res.data.success) {
         dispatch({
