@@ -1,6 +1,10 @@
+//dependency imports
 import { useSelector, useDispatch } from 'react-redux'
 import { useState, useEffect } from 'react'
+import { useNavigate } from 'react-router-dom'
 import axios from 'axios'
+
+//component imports
 import Register from './Register.jsx'
 
 export default function Login() {
@@ -15,6 +19,7 @@ export default function Login() {
 
     //action declarations
     const dispatch = useDispatch()
+    const navigate = useNavigate()
 
     //handle login function
     const handleLogin = async (e) => {
@@ -38,6 +43,7 @@ export default function Login() {
 
             setUsername("")
             setPassword("")
+            navigate("/mansion")
         }
     }
 
