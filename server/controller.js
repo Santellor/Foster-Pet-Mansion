@@ -1,4 +1,7 @@
 import { 
+    getUserByName,
+    getUserByEmail,
+    newUser,
     newPet, 
     newMedalOwner, 
     newAchievementOwner, 
@@ -10,8 +13,102 @@ import {
     removeAchievement,
     editPet
 } from "../database/queries.js"
+import bcryptjs from 'bcryptjs'
+import { User } from '../database/model.js'
 
 const handlerFunctions = {
+    sessionCheck: async (req, res) => {
+        if (req.session.userID) {
+            res.json({
+                message: "user is still logged in",
+                success: true,
+                userID: req.session.userID,
+                username: req.session.username,
+                loggedIn: true
+            })
+            return
+        }
+        else {
+            res.json({
+                message: "no user logged in",
+                success: false
+            })
+            return
+        }
+    },
+  
+    register: async (req, res) => {
+        const { username, email, password } = req.body
+  
+        if (await User.findOne({ where: { username: username }})) {
+            res.json({
+                message: 'username taken'
+            })
+            return
+        }
+  
+      if (await User.findOne({ where: { email: email }})) {
+          res.json({
+              message: 'email already in use'
+          })
+          return
+      }
+  
+        const hashedPassword = bcryptjs.hashSync(password, bcryptjs.genSaltSync(10))
+  
+        const user = await User.create({
+            username: username,
+            email: email,
+            password: hashedPassword
+        })
+  
+        req.session.userID = user.userID
+  
+        res.json({
+            message: 'user created',
+            success: 'true',
+            userID: user.userID
+        })
+    },
+  
+    login: async (req, res) => {
+        const { username, password } = req.body
+  
+        const user = await User.findOne({
+            where: {
+                username: username
+            }
+        })
+  
+        if (!user || !bcryptjs.compareSync(password, user.password)) {
+            res.json({
+                message: 'incorrect username or password',
+                success: false
+            })
+            return
+        }
+  
+        req.session.userID = user.userID
+        req.session.username = user.username
+  
+        res.json({
+            message: 'user logged in',
+            success: true,
+            userID: req.session.userID,
+            username: req.session.username,
+            loggedIn: true
+        })
+    },
+  
+    logout: async (req, res) => {
+        req.session.destroy()
+  
+        res.json({
+            message: 'user logged out',
+            success: true
+        })
+        return
+    },
 
     postPet: async (req, res) => {
         const { entry } = req.body
