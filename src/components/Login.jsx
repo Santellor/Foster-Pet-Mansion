@@ -30,7 +30,7 @@ export default function Login() {
             password: password
         }
 
-        const res = await axios.post('/api/login', body)
+        const res = await axios.post('/api/post_login', body)
 
         if (res.data.success) {
             dispatch({
@@ -51,7 +51,7 @@ export default function Login() {
     return (
         <div>
             <nav>
-                <h1>{loggedIn ? "" : "Login"}</h1>
+                <h1>Login</h1>
             </nav>
                 
                     <>

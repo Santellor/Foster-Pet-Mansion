@@ -1,7 +1,4 @@
 import { 
-    getUserByName,
-    getUserByEmail,
-    newUser,
     newPet, 
     newMedalOwner, 
     newAchievementOwner, 
@@ -62,12 +59,12 @@ const handlerFunctions = {
             password: hashedPassword
         })
   
-        req.session.userID = user.userID
+        req.session.userId = user.userId
   
         res.json({
             message: 'user created',
             success: 'true',
-            userID: user.userID
+            userId: user.userId
         })
     },
   

@@ -1,13 +1,15 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
+import axios from 'axios'
+import { useDispatch } from 'react-redux'
 
 
 const Mansion = () => {
 
     const navigate = useNavigate()
+    const dispatch = useDispatch()
     const handleLogout = async () => {
-        navigate('/') // <-- delete this once you have back end routes
-        const res = await axios.get('/api/logout')
+        const res = await axios.get('/api/get_logout')
 
         if (res.data.success) {
             dispatch({
@@ -18,7 +20,7 @@ const Mansion = () => {
         }
     }
 
-    
+
 
   return (
     <div>

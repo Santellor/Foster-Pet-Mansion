@@ -2,11 +2,11 @@
     {
     "username": "admin",
     "email": "admin@me.com",
-    "password": "admin"
+    "password": "$2a$10$AD9slv.aFTyd5u8xk/USvOQOXhFyekVeIg9MoVRhjJJc/JsCr9qVi"
     },
     {
     "username": "q",
     "email": "q@me.com",
-    "password": "q"
+    "password": "$2a$10$TJNfX6DC8ktU.iWjYROehuk3NF71aho9.19q1Jr6BnolipAUQWBfS"
     }
 ]
