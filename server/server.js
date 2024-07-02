@@ -22,6 +22,10 @@ app.use(
 
 // endpoints
 const {
+    sessionCheck,
+    register,
+    login,
+    logout,
     getPets, 
     getUserMedals, 
     getUserAchievements,
@@ -37,10 +41,14 @@ const {
     app.get('/api/get_pets/:id', getPets)
     app.get('/api/get_medals/:id', getUserMedals)
     app.get('/api/get_achievements/:id', getUserAchievements)
+    app.get('/api/get_session_check', sessionCheck)
+    app.get('/api/get_logout', logout)
 
     app.post('/api/post_pet', postPet)
     app.post('/api/post_medal', postMedal)
     app.post('/api/post_achievement', postAchievement)
+    app.post('/api/post_register', register)
+    app.post('/api/post_login', login)
 
     app.delete('/api/delete_pet/:id', deletePet)
     app.delete('/api/delete_medal/:userId/:medalId', deleteMedal)
