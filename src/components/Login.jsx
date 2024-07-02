@@ -47,51 +47,18 @@ export default function Login() {
         }
     }
 
-    //handle logout function
-    const handleLogout = async () => {
-        const res = await axios.get('/api/logout')
-
-        if (res.data.success) {
-            dispatch({
-                type: "LOGOUT"
-            })
-        }
-    }
-
-    //session check function
-    const sessionCheck = async () => {
-        const res = await axios.get('/api/session-check')
-
-        if (res.data.success) {
-            dispatch({
-                type: "USER_AUTH",
-                payload: {
-                    userId: res.data.userId,
-                    username: res.data.username,
-                    loggedIn: true
-                }
-            })
-        }
-    }
-
-    useEffect(() => {
-        sessionCheck()
-    }, [])
-
     //html rendering
-    return showRegister ? (
-        <Register setShowRegister={setShowRegister} />
-    ) : (
+    return (
         <div>
             <nav>
                 <h1>{loggedIn ? "" : "Login"}</h1>
             </nav>
-                {!userId && 
+                
                     <>
-                        <button onClick={() => setShowRegister(true)}>Register a new account</button>
+                        <button onClick={() => navigate("/register")}>Register a new account</button>
                     </>
-                }
-            {!userId &&
+                
+            
                 <form  onSubmit={handleLogin}>
                     <input 
                         type='text' 
@@ -109,13 +76,6 @@ export default function Login() {
                         type='submit'
                         />
                 </form>
-            }
-            {userId && 
-                <>
-                    <h3>Welcome, {username}</h3>
-                    <button onClick={handleLogout}>Logout</button>
-                </>
-            }
         </div>
     )
 }
