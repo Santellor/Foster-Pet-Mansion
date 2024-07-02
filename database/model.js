@@ -53,7 +53,7 @@ Pet.init(
       autoIncrement: true,
       primaryKey: true,
     },
-    name: {
+    petName: {
       type: DataTypes.STRING(40),
       allowNull: false,
     },
@@ -119,10 +119,27 @@ Medal.init(
     {
       modelName: 'medal',
       sequelize: db,
-      timestamps: true,
-      updatedAt: true,
+      timestamps: false,
+      updatedAt: false,
     },
 );
+
+export class MedalHandler extends Model {
+    [util.inspect.custom]() {
+        return this.toJSON();
+    }
+}
+
+MedalHandler.init(
+    {},
+    {
+      modelName: 'medal_handler',
+      sequelize: db,
+      timestamps: false,
+      updatedAt: false,
+    },
+);
+
 
 export class Achievement extends Model {
     [util.inspect.custom]() {
@@ -141,12 +158,32 @@ Achievement.init(
         type: DataTypes.STRING(40),
         allowNull: false,
       },
+      description: {
+        type: DataTypes.STRING(1020),
+        allowNull: false,
+      },
     },
     {
       modelName: 'achievement',
       sequelize: db,
-      timestamps: true,
-      updatedAt: true,
+      timestamps: false,
+      updatedAt: false,
+    },
+);
+
+export class AchievementHandler extends Model {
+    [util.inspect.custom]() {
+        return this.toJSON();
+    }
+}
+
+AchievementHandler.init(
+    {},
+    {
+      modelName: 'achievement_handler',
+      sequelize: db,
+      timestamps: false,
+      updatedAt: false,
     },
 );
 
@@ -156,11 +193,11 @@ Pet.belongsTo(User,  { foreignKey: 'userId' });
 
 // many to many relationship user <-> medal
     // create a junction table automatically for medals
-User.belongsToMany(Medal, {through: 'medal_handler'})
-Medal.belongsToMany(User, {through: 'medal_handler'})
+User.belongsToMany(Medal, {through: 'medal_handler', foreignKey: 'userId'})
+Medal.belongsToMany(User, {through: 'medal_handler', foreignKey: 'medalId'})
 
 // many to many relationship user <-> achievement
     // create a junction table automatically for achievements
-User.belongsToMany(Achievement, {through: 'achievement_handler'})
-Achievement.belongsToMany(User, {through: 'achievement_handler'})
+User.belongsToMany(Achievement, {through: 'achievement_handler', foreignKey: 'userId'})
+Achievement.belongsToMany(User, {through: 'achievement_handler', foreignKey: 'achievementId'})
 
