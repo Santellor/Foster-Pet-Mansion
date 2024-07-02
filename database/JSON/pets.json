@@ -1,0 +1,14 @@
+[
+    {
+    "petName": "Rookie",
+    "hunger": "100",
+    "hungerDefault": "5",
+    "speed": "5",
+    "swim": "5",
+    "jump": "5",
+    "luck": "5",
+    "frontHalf" : "rock",
+    "backHalf" : "rock",
+    "userId" : "1"
+    }
+]
