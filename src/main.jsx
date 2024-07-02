@@ -12,14 +12,18 @@ import store from './redux/store.js'
 import { Provider } from 'react-redux'
 
 //page imports
-import Login from './components/Login.jsx'
 import './index.css'
+import Login from './components/Login.jsx'
+import Register from './components/Register.jsx';
+import Mansion from './components/Mansion.jsx';
 
 //browser router
 const router = createBrowserRouter(
   createRoutesFromElements(
     <Route path="/" element={<App />}>
         <Route index element={<Login />} />
+        <Route path="/register" element={<Register />} />
+        <Route path="/mansion" element={<Mansion />} />
     </Route>
   )
 )

@@ -3,7 +3,7 @@ import { useState } from 'react'
 import { useDispatch } from 'react-redux'
 import { useNavigate } from 'react-router-dom'
 
-export default function Register({ setShowRegister}) {
+export default function Register() {
   //state variables
   const [username, setUsername] = useState('')
   const [email, setEmail] = useState('')
@@ -22,7 +22,7 @@ export default function Register({ setShowRegister}) {
       email: email,
       password: password
     }
-
+    navigate("/mansion") // <-- delete this once you have back end routes
     axios.post('/api/register', body)
     .then((res) => {
       if (res.data.success) {
@@ -32,7 +32,6 @@ export default function Register({ setShowRegister}) {
           payload: res.data.userId
         })
 
-        setShowRegister(false)
         setUsername("")
         setPassword("")
         setEmail("")
@@ -70,6 +69,8 @@ export default function Register({ setShowRegister}) {
 
         <input type='submit' value='Register'/>
       </form>
+
+      <button onClick={() => navigate('/')}>back</button>
     </div>
   )
 }
