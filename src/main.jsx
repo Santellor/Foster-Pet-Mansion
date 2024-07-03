@@ -12,10 +12,10 @@ import store from './redux/store.js'
 import { Provider } from 'react-redux'
 
 //page imports
-import './index.css'
 import Login from './components/Login.jsx'
 import Register from './components/Register.jsx';
 import Mansion from './components/Mansion.jsx';
+import Race from './components/Race.jsx'
 
 //browser router
 const router = createBrowserRouter(
