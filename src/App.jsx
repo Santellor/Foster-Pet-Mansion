@@ -1,5 +1,4 @@
 import { Outlet, useNavigate } from 'react-router-dom'
-import './index.css'
 import axios from 'axios'
 
 import { useSelector, useDispatch } from 'react-redux'
