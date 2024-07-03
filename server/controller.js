@@ -15,11 +15,11 @@ import { User } from '../database/model.js'
 
 const handlerFunctions = {
     sessionCheck: async (req, res) => {
-        if (req.session.userID) {
+        if (req.session.userId) {
             res.json({
                 message: "user is still logged in",
                 success: true,
-                userID: req.session.userID,
+                userId: req.session.userId,
                 username: req.session.username,
                 loggedIn: true
             })
@@ -85,13 +85,13 @@ const handlerFunctions = {
             return
         }
   
-        req.session.userID = user.userID
+        req.session.userId = user.userId
         req.session.username = user.username
   
         res.json({
             message: 'user logged in',
             success: true,
-            userID: req.session.userID,
+            userId: req.session.userId,
             username: req.session.username,
             loggedIn: true
         })
