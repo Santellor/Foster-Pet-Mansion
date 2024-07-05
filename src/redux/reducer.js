@@ -2,7 +2,8 @@ const initialState = {
     userId: null,
     otherValue: "hello",
     username: null,
-    loggedIn: false
+    loggedIn: false,
+    petsToRace: []
 }
 
 export default function reducer(state = initialState, action) {
@@ -20,6 +21,11 @@ export default function reducer(state = initialState, action) {
                 userId: null,
                 username: null,
                 loggedIn: false
+            }
+        case "RACE_PETS":
+            return {
+                ...state,
+                petsToRace: action.payload,
             }
         default:
             return state

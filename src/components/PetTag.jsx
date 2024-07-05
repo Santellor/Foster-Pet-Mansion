@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react'
-import PetTag from './PetTag'
 
-const Pet = ({ pet, feedPet, renamePet, rehomePet }) => {
+const PetTag = ({ pet, feedPet, renamePet, rehomePet }) => {
     const [changedName, setChangedName] = useState('')
     const [naming, setNaming] = useState(false)
     const [rehoming, setRehoming] = useState(false)
@@ -48,14 +47,19 @@ const Pet = ({ pet, feedPet, renamePet, rehomePet }) => {
 
   return (
     <div> 
-        <p> {/* onMouseOver={< PetTag  
-                    pet={pet}
-                    feedPet={feedPet}
-                    renamePet={renamePet}
-                    rehomePet={rehomePet}/>}> */}
-        {pet.petName}</p>
+        <br />
+        {naming?  <> <input type='text' value={changedName} onChange={(e) => setChangedName(e.target.value)}/> <button onClick={completeNaming}>rename</button> </> 
+        : <>  {pet.petName}   <button onClick={startNaming} >rename</button> </> } <br /> 
+        hunger: {pet.hunger} <button onClick={() => feedPet(callbackId, callbackHunger)}>feed me</button> <br />
+        speed: {pet.speed} <br />
+        swim: {pet.swim} <br />
+        jump: {pet.jump} <br />
+        luck: {pet.luck} <br />
+        front: {pet.frontHalf} <br />
+        back: {pet.backHalf} <br />
+        {rehomingButtons}
     </div>
   )
 }
 
-export default Pet
+export default PetTag
