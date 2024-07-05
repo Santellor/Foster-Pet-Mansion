@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import axios from 'axios'
 import { useDispatch, useSelector } from 'react-redux'
+import '../mansion.css'
 import Pet from './Pet'
 import Dropdown from './Dropdown'
 
@@ -276,21 +277,18 @@ const createPet = (petName) => {
         loadPets()
     }, [userId])
 
-  const sendPetsToRace = (pets) => {
-
-    console.log(pets)
-
-  }
+  const mansion = document.getElementById("mansion");
+  const ctx = mansion.getContext("2d")
     
   return (
-    <div>
+    <div >
         <div>Mansion</div>
         <button onClick={handleLogout}>log out</button>
         <button onClick={() => createPet(`new pet`)}>adopt a pet</button>
         < Dropdown options = {rawPets} />
         <button onClick={(() => navigate('/field_race'))}>race these pets!</button>
-        <div>
-            {currentPets}
+        <div className='mansion-backdrop'>
+            <canvas id="mansion"></canvas>
         </div>
     </div>
   )
