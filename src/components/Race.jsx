@@ -2,6 +2,8 @@
 import '../race.css'
 import { useState, useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useSelector } from 'react-redux'
+import getPetImages from '../utils/getPetImages'
 
 export default function Race(pet) {
     //variables
@@ -12,20 +14,44 @@ export default function Race(pet) {
     const [winner, setWinner] = useState("")
     const movementTick = 10
     const navigate = useNavigate()
+    const petsToRace = useSelector((state) => state.petsToRace)
+    const initialCompetitors = []
+    const [competitors, setCompetitors] = useState(initialCompetitors)
 
-    const Maxford = {name: "Maxford", speed: 10, x: 50, y: 365, frontImages: [], backImages: [], frontAnimations: ["/frontPyroAvigator.png", "/frontPyroAvigator1.png"], backAnimations: ["/backPyroAvigator.png", "/backPyroAvigator1.png"], frontAnim: 0, backAnim: 0}
-    const Rock = {name: "Rock", speed: 5, x: 50, y: 365, frontImages: [], backImages: [], frontAnimations: ["/frontRock.png"], backAnimations: ["/backRock.png"], frontAnim: 0, backAnim: 0}
-    const competitors = [Rock, Maxford]
+    const Maxford = {name: "Maxford", speed: 10, x: 50, y: 365, frontImages: [], backImages: [], frontAnimations: ["/frontPyroAvigator0.png", "/frontPyroAvigator1.png"], backAnimations: ["/backPyroAvigator0.png", "/backPyroAvigator1.png"], frontAnim: 0, backAnim: 0}
+    const Rock = {name: "Rock", speed: 5, x: 50, y: 365, frontImages: [], backImages: [], frontAnimations: ["/frontRock0.png"], backAnimations: ["/backRock0.png"], frontAnim: 0, backAnim: 0}
 
     //calculate average pet speed -> used for calculating movement on movment tick
     const averageSpeed = (pet) => {
-        if (pet.hunger >= hungerThreshold) {
-            return Math.round(pet.speed) / (100 / movementTick )
-        }
-        else {
-            return Math.round(pet.speed * (pet.hunger / 100))/ (100 / movementTick)
-        }
+      if (pet.hunger >= hungerThreshold) {
+          return Math.round(pet.speed) / (100 / movementTick )
+      }
+      else {
+          return Math.round(pet.speed * (pet.hunger / 100)) / (100 / movementTick)
+      }
+  }
+
+    //convert pet data to pet object
+  const convertCompToObject = async (pets) => {
+    for (const pet of pets) {
+      const images = await getPetImages(pet)
+      console.log(`Redux Pet Images: ${getPetImages(pet)[0]}`)
+      competitors.push({
+        name: pet.petName,
+        speed: averageSpeed(pet),
+        x: 50,
+        y: 365,
+        frontImages: [],
+        backImages: [],
+        frontAnim: 0,
+        backAnim: 0,
+        frontAnimations: images[0],
+        backAnimations: images[1]
+      })
     }
+  }
+
+  convertCompToObject(petsToRace)
 
     //calculate luck -> used for skipping course
     const skipCourse = (pet) => {
