@@ -1,20 +1,21 @@
 //dependency imports
 import '../race.css'
 import { useState, useEffect, useRef } from 'react'
+import { useNavigate } from 'react-router-dom'
 
 export default function Race(pet) {
     //variables
     const trackLength = 200 //pixels
     const hungerThreshold = 90
     const [timeUntilStart, setTimeUntilStart] = useState(3)
-    const canvasWidth = 1300
+    const [raceOver, setRaceOver] = useState(false)
+    const [winner, setWinner] = useState("")
     const movementTick = 10
+    const navigate = useNavigate()
 
-    // const Fred = {speed: 10, x: 50, y: 370, image: "", src: "https://www.creativefabrica.com/wp-content/uploads/2023/05/19/Create-An-8bit-Shiba-Dog-Graphic-69994037-1.png"}
-    // const Rock = {speed: 5, x: 50, y: 370, image: "", src: "https://i.redd.it/w1ctilzr8df71.png"}
-    // const Bob = {speed: 12, x: 50, y: 370, image: "", src: "https://art.pixilart.com/thumb/ccaa41d2a718edb.png"}
-
-    // const competitors = [Rock, Bob, Fred]
+    const Maxford = {name: "Maxford", speed: 10, x: 50, y: 365, frontImages: [], backImages: [], frontAnimations: ["/frontPyroAvigator.png", "/frontPyroAvigator1.png"], backAnimations: ["/backPyroAvigator.png", "/backPyroAvigator1.png"], frontAnim: 0, backAnim: 0}
+    const Rock = {name: "Rock", speed: 5, x: 50, y: 365, frontImages: [], backImages: [], frontAnimations: ["/frontRock.png"], backAnimations: ["/backRock.png"], frontAnim: 0, backAnim: 0}
+    const competitors = [Rock, Maxford]
 
     //calculate average pet speed -> used for calculating movement on movment tick
     const averageSpeed = (pet) => {
@@ -38,60 +39,117 @@ export default function Race(pet) {
         pet.hunger -= pet.hungerDefault
     }
 
-    //pull  user's active pet
+    //pull  user's active pets
     //generate 4 random pets
     //position all pets at the starting line
     //render movement
     useEffect(() => {
         const canvas = document.getElementById('canvas')
         const ctx = canvas.getContext("2d");
-    
         const canvasWidth = canvas.width;
+        ctx.imageSmoothingEnabled = false;
     
-        const loadImages = () => {
-          const promises = competitors.map(data => {
-            return new Promise((resolve, reject) => {
-              const image = new Image();
-              image.onload = () => resolve({ image, ...data });
-              image.onerror = reject;
-              image.src = data.src;
-              data.image = image
+        //generate front half images
+        const loadFrontHalfImages = () => {
+          const promises = competitors.flatMap(data => {
+            return data.frontAnimations.map(src => {
+              return new Promise((resolve, reject) => {
+                const image = new Image();
+                image.onload = () => {
+                  data.frontImages.push(image);
+                  resolve({ image, ...data });
+                };
+                image.onerror = () => reject(new Error(`Failed to load image: ${src}`));
+                image.src = src;
+              });
             });
           });
-    
+        
+          return Promise.all(promises);
+        };
+
+        //generate back half images
+        const loadBackHalfImages = () => {
+          const promises = competitors.flatMap(data => {
+            return data.backAnimations.map(src => {
+              return new Promise((resolve, reject) => {
+                const image = new Image();
+                image.onload = () => {
+                  data.backImages.push(image);
+                  resolve({ image, ...data });
+                };
+                image.onerror = () => reject(new Error(`Failed to load image: ${src}`));
+                image.src = src;
+              });
+            });
+          });
+        
           return Promise.all(promises);
         };
     
-        const drawImages = (loadedImages) => {
-          loadedImages.forEach(({ image, x, y }) => {
-            ctx.drawImage(image, x, y, image.width / 1.5, image.height / 1.5);
+        //draw initial front half images
+        const drawFrontHalfImages = (loadedFrontHalfImages) => {
+          loadedFrontHalfImages.forEach(({ frontImages, x, y }) => {
+            ctx.drawImage(frontImages[0], x, y, 64, 64);
+          });
+        };
+
+        //draw initial back half images
+        const drawBackHalfImages = (loadedBackHalfImages) => {
+          loadedBackHalfImages.forEach(({ backImages, x, y }) => {
+            ctx.drawImage(backImages[0], x, y, 64, 64);
           });
         };
     
-        loadImages().then(drawImages);
+        if (!raceOver) {
+          loadFrontHalfImages().then(drawFrontHalfImages);
+          loadBackHalfImages().then(drawBackHalfImages)
+        }
     
-        if (timeUntilStart <= 0) {
+        //render movement
+        if (timeUntilStart <= 0 && !raceOver) {
           const animateImages = () => {
             ctx.clearRect(0, 0, canvas.width, canvas.height)
-            competitors.forEach(data => {
-              let { image, x, y, speed } = data;
-              x += (speed / movementTick);
-    
-              if (x > canvasWidth) {
-                x = -image.width / 1.5;
-              }
-            console.log(image)
-              ctx.drawImage(image, x, y, image.width / 1.5, image.height / 1.5);
 
-              data.x = x
-            });
+            if (!raceOver) {
+              competitors.forEach(data => {
+                let { frontImages, backImages, x, y, speed } = data;
+
+                if (!raceOver) {
+                  x += (speed / movementTick);
+        
+                  if (x > canvasWidth) {
+                    endRace(data)
+                  }
+                  if (x > canvasWidth) {
+                    x = -64;
+                  }
+
+                  //front animations
+                  if (data.frontAnim >= frontImages.length) {
+                    data.frontAnim = 0
+                  }
+                  ctx.drawImage(frontImages[data.frontAnim], x, y, 64, 64);
+                  data.frontAnim += 1
+
+                  //back animations
+                  if (data.backAnim >= backImages.length) {
+                    data.backAnim = 0
+                  }
+                  ctx.drawImage(backImages[data.backAnim], x, y, 64, 64);
+                  data.backAnim += 1
+
+                  data.x = x
+                }
+              });
+            }
           };
     
           const intervalId = setInterval(animateImages, movementTick);
     
           return () => clearInterval(intervalId);
         }
-      }, [timeUntilStart]);
+      }, [timeUntilStart, raceOver]);
 
     // useEffect to run code after component mounts
     useEffect(() => {
@@ -106,12 +164,45 @@ export default function Race(pet) {
 
         return () => clearInterval(intervalId);
     }, [timeUntilStart]);
+
     //calculate winner
+    const endRace = (winner) => {
+      setRaceOver(true)
+      setWinner(winner.name)
+
+      const canvas = document.getElementById('canvas')
+      const ctx = canvas.getContext("2d");
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      competitors.forEach((data) => {
+        if (data.name != winner.name) {
+          ctx.drawImage(data.frontImages[0], data.x, 315, 64, 64)
+          ctx.drawImage(data.backImages[0], data.x, 315, 64, 64)
+        }
+      })
+
+      //ctx.clearRect(winner.x, winner.y, 64, 64)
+      ctx.drawImage(winner.frontImages[0], 600, 150, 64, 64);
+      ctx.drawImage(winner.backImages[0], 600, 150, 64, 64);
+      const image = new Image();
+      image.onload = () => {
+          ctx.drawImage(image, 600, 107, 64, 64); // Draw crown after winner's avatar
+      };
+      image.src = "/crown.png";
+      ctx.drawImage(image, 600, 214, 64, 64)
+    }
+
+    const toMansion = () => {
+      navigate('/mansion')
+    }
+
     //html rendering
     return (
-        <div className={`moving-background ${timeUntilStart <= 0 ? 'race-started' : ''}`}>
+        <div className={`moving-background ${timeUntilStart <= 0 && !raceOver ? 'race-started' : ''}`}>
             <h1 className="test">{timeUntilStart <= 0 ? "Race underway" : `Race starting in ${timeUntilStart}`}</h1>
-            <canvas id="canvas" width="1300" height="600"></canvas>
+            <h1>{raceOver ? `${winner} was the winner!`: " "}</h1>
+            <canvas id="canvas" width="1100" height="500"></canvas>
+            { raceOver ? <button onClick={toMansion}>Return to Mansion</button> : <></>}
         </div>
     )
 }
