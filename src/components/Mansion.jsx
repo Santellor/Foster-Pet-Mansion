@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import axios from 'axios'
 import { useDispatch, useSelector } from 'react-redux'
 import Pet from './Pet'
+import Dropdown from './Dropdown'
 
 
 const Mansion = () => {
@@ -10,7 +11,12 @@ const Mansion = () => {
     const navigate = useNavigate()
     const dispatch = useDispatch()
     const userId = useSelector((state) => state.userId)
+    const petsToRace = useSelector((state) => state.petsToRace)
     const [currentPets, setCurrentPets] = useState([])
+    const [rawPets, setRawPets] = useState([])
+    const [petOptions, setPetOptions] = useState([])
+
+    console.log(`petsToRace`, petsToRace)
     
 
     // returns to the login page and clears state
@@ -50,6 +56,12 @@ const Mansion = () => {
         if (userId) {
             const {data} = await axios.get(`/api/get_pets/${userId}`)
             let petDataFromBackEnd = data.pets
+
+              const selectPets = petDataFromBackEnd.map((pet, i) => {
+                
+                return <option key={i} value={pet}>{pet.petName}</option>
+              })
+              setPetOptions(selectPets)
 
             //increases the hunger of a pet by 20, to max of 100, then recursively calls loadPets
             const feedPet = async (id, hunger) => {
@@ -98,6 +110,7 @@ const Mansion = () => {
                
                    
             }) 
+        setRawPets(petDataFromBackEnd)
         setCurrentPets(petsInMansion)
         }
     }
@@ -257,17 +270,25 @@ const createPet = (petName) => {
           });
       }
 };
+
 // loads pets on initial access, and if the userId changes state with sessionCheck in App.jsx)
     useEffect(()=> {
         loadPets()
     }, [userId])
+
+  const sendPetsToRace = (pets) => {
+
+    console.log(pets)
+
+  }
     
   return (
     <div>
         <div>Mansion</div>
         <button onClick={handleLogout}>log out</button>
         <button onClick={() => createPet(`new pet`)}>adopt a pet</button>
-
+        < Dropdown options = {rawPets} />
+        <button onClick={(() => navigate('/field_race'))}>race these pets!</button>
         <div>
             {currentPets}
         </div>
