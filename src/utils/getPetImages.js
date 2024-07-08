@@ -1,4 +1,4 @@
-function checkImageExists(imageUrl) {
+const checkImageExists = async (imageUrl) => {
     return new Promise((resolve, reject) => {
         const img = new Image();
         img.onload = () => resolve(true);
@@ -7,8 +7,11 @@ function checkImageExists(imageUrl) {
     });
 };
 
-function capitalizeFirstLetter(string) {
-    return string.charAt(0).toUpperCase() + string.slice(1);
+function format(str) {
+    let words = str.split(/\s+/);
+    let capitalizedWords = words.map(word => word.charAt(0).toUpperCase() + word.slice(1));
+    let formattedStr = capitalizedWords.join('');
+    return formattedStr;
 }
 
 const getPetImages = async (pet) => {
@@ -17,18 +20,16 @@ const getPetImages = async (pet) => {
     const backImages = []
     const maxAnimations = 4
     for (let i = 0; i < maxAnimations; i++) {
-        if (await checkImageExists(`/front${capitalizeFirstLetter(pet.frontHalf)}${i}.png`)) {
-            frontImages.push(`/front${capitalizeFirstLetter(pet.frontHalf)}${i}.png`)
+        if (await checkImageExists(`/front${format(pet.frontHalf)}${i}.png`)) {
+            frontImages.push(`/front${format(pet.frontHalf)}${i}.png`)
         }
 
-        if (await checkImageExists(`/back${capitalizeFirstLetter(pet.backHalf)}${i}.png`)) {
-            backImages.push(`/back${capitalizeFirstLetter(pet.backHalf)}${i}.png`)
+        if (await checkImageExists(`/back${format(pet.backHalf)}${i}.png`)) {
+            backImages.push(`/back${format(pet.backHalf)}${i}.png`)
         }
     }
     results.push(frontImages)
     results.push(backImages)
-    console.log(`All the front images should be here: ${results[0]}`)
-    console.log(`All the back images should be here: ${results[1]}`)
     return results
 }
 
