@@ -170,11 +170,15 @@ export default function Race(pet) {
 
               if (!raceOver) {
                 x += (speed / movementTick);
+
+                if (speed === 0) {
+                  x -= 2
+                }
       
-                if (x > canvasWidth) {
+                if (x > canvasWidth - 64) {
                   endRace(data)
                 }
-                if (x > canvasWidth) {
+                if (x > canvasWidth - 64) {
                   x = -64;
                 }
 
@@ -263,7 +267,7 @@ export default function Race(pet) {
       <div className={`moving-background ${timeUntilStart <= 0 && !raceOver ? 'race-started' : ''}`}>
           <h1 className="test">{timeUntilStart <= 0 ? "Race underway" : `Race starting in ${timeUntilStart}`}</h1>
           <h1>{raceOver ? `${winner.name} was the winner!`: " "}</h1>
-          <canvas id="canvas" width={1100} height={500}></canvas>
+          <canvas id="canvas" width={1250} height={500}></canvas>
           { raceOver ? <button onClick={toMansion}>Return to Mansion</button> : <></>}
       </div>
   )
