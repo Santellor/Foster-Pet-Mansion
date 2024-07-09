@@ -1,12 +1,12 @@
 //dependency imports
-import '../swim.css'
+import '../bike.css'
 import { useState, useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useSelector, useDispatch } from 'react-redux'
 import getPetImages from '../utils/getPetImages.js'
 import generateRandomPet from '../utils/genRandomPet.js'
 
-export default function Swim(pet) {
+export default function Bike(pet) {
   //variables
   const hungerThreshold = 90
   const [timeUntilStart, setTimeUntilStart] = useState(3)
@@ -19,17 +19,8 @@ export default function Swim(pet) {
 
   const petsToRace = useSelector((state) => state.petsToRace)
   const [competitors, setCompetitors] = useState([])
-  const [waterLine, setWaterLine] = useState((window.innerHeight - 230))
-
-  //calculate average pet swim -> used for calculating movement on movment tick
-  const averageSwim = (pet) => {
-    if (pet.hunger >= hungerThreshold) {
-        return Math.round(pet.swim)
-    }
-    else {
-        return Math.round(pet.swim * (pet.hunger / 100))
-    }
-  }
+  const [grassLine, setGrassLine] = useState((window.innerHeight - 350))
+  const [bikeImages, setBikeImages] = useState(([]))
 
   //convert pet data to pet object
   const convertCompToObject = async (pets) => {
@@ -40,16 +31,17 @@ export default function Swim(pet) {
       const images = await getPetImages(pet)
       opps.push({
         name: pet.petName,
-        swim: averageSwim(pet),
+        speed: Math.floor(Math.random() * (15 - 5 + 1)) + 5,
         luck: pet.luck,
         x: 50,
-        y: waterLine,
+        y: grassLine,
         frontImages: [],
         backImages: [],
         frontAnim: 0,
         backAnim: 0,
         frontAnimations: images[0],
-        backAnimations: images[1]
+        backAnimations: images[1],
+        bikeAnim: 0
       })
     }
 
@@ -59,16 +51,17 @@ export default function Swim(pet) {
       const images = await getPetImages(pet)
       opps.push({
         name: `Competitor ${(opps.length-1) + 1}`,
-        swim: averageSwim(pet),
+        speed: Math.floor(Math.random() * (15 - 5 + 1)) + 5,
         luck: pet.luck,
         x: 50,
-        y: waterLine,
+        y: grassLine,
         frontImages: [],
         backImages: [],
         frontAnim: 0,
         backAnim: 0,
         frontAnimations: images[0],
-        backAnimations: images[1]
+        backAnimations: images[1],
+        bikeAnim: 0
       })
     }
     setCompetitors(opps)
@@ -80,6 +73,7 @@ export default function Swim(pet) {
     const randomChanceValue = Math.floor(Math.random() * (trackLength*(unluckFactor*10))) + 1; // Random number between 1 and 1100
 
     // Calculate the threshold based on track length
+
     return randomChanceValue <= pet.luck;
   }
 
@@ -92,6 +86,18 @@ export default function Swim(pet) {
   useEffect(() => {
     //convert pet components to competitor objects
     convertCompToObject(petsToRace)
+
+    
+    //load bike images
+    const images = []
+    for (let i = 0; i < 2; i++) {
+        const image = new Image
+        image.src = `/bike${i}.png`
+        image.onload = () => {
+            images.push(image)
+        }
+    }
+    setBikeImages(images)
   }, [])
   
   //render movement
@@ -112,7 +118,7 @@ export default function Swim(pet) {
                 resolve({ image, ...data });
               };
               image.onerror = () => reject(new Error(`Failed to load image: ${src}`));
-              image.src = src;
+              image.src = data.frontAnimations[0];
             });
           });
         });
@@ -131,7 +137,7 @@ export default function Swim(pet) {
                 resolve({ image, ...data });
               };
               image.onerror = () => reject(new Error(`Failed to load image: ${src}`));
-              image.src = src;
+              image.src = data.backAnimations[0];
             });
           });
         });
@@ -152,6 +158,11 @@ export default function Swim(pet) {
           ctx.drawImage(backImages[0], x, y, 64, 64);
         });
       };
+
+      //draw initial bikes
+      competitors.forEach((data) => {
+        ctx.drawImage(bikeImages[0], data.x, (data.y + 32), 64, 64)
+      })
   
       if (!raceOver) {
         loadFrontHalfImages().then(drawFrontHalfImages);
@@ -165,21 +176,24 @@ export default function Swim(pet) {
 
           if (!raceOver) {
             competitors.forEach(data => {
-              let { frontImages, backImages, x, y, swim } = data;
+              let { frontImages, backImages, x, y, speed } = data;
 
               if (!raceOver) {
-                x += (swim / movementTick);
-
-                if (swim === 0) {
-                  x -= 2
-                }
-
+                x += (speed / movementTick);
+      
                 if (x > canvasWidth - 64) {
                   endRace(data)
                 }
                 if (x > canvasWidth - 64) {
                   x = -64;
                 }
+
+                //bike animations
+                if (data.bikeAnim > 1) {
+                    data.bikeAnim = 0
+                }
+                ctx.drawImage(bikeImages[data.bikeAnim], data.x, (data.y + 32), 64, 64) 
+                data.bikeAnim++
 
                 //front animations
                 if (data.frontAnim >= frontImages.length) {
@@ -232,7 +246,6 @@ export default function Swim(pet) {
       payload: []
     })
 
-    console.log(competitors)
       // Example: Wait for 3 seconds (3000 milliseconds)
   setTimeout(() => {
     // Code to execute after waiting
@@ -264,7 +277,7 @@ export default function Swim(pet) {
 
   //html rendering
   return (
-      <div className={`swim-background ${timeUntilStart <= 0 && !raceOver ? 'swim-started' : ''}`}>
+      <div className={`bike-background ${timeUntilStart <= 0 && !raceOver ? 'bike-started' : ''}`}>
           <h1 className="test">{timeUntilStart <= 0 ? "Race underway" : `Race starting in ${timeUntilStart}`}</h1>
           <h1>{raceOver ? `${winner.name} was the winner!`: " "}</h1>
           <canvas id="canvas" width={1250} height={500}></canvas>

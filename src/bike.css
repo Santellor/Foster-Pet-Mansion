@@ -1,0 +1,23 @@
+.bike-background {
+    position: relative;
+    width: 100%;
+    height: 100vh; /* Adjust height as needed */
+    margin: 0;
+    padding: 0;
+    background-image: url('/forest.png');
+    background-size: contain;
+    background-position: center;
+}
+
+.bike-background.bike-started {
+    animation: moveBikeBackground 12s linear infinite;
+}
+
+@keyframes moveBikeBackground {
+    0% {
+        background-position: 0% 50%;
+    }
+    100% {
+        background-position: -2550% 50%;
+    }
+}

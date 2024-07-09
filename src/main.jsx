@@ -17,6 +17,7 @@ import Register from './components/Register.jsx';
 import Mansion from './components/Mansion.jsx';
 import Race from './components/Race.jsx'
 import Swim from './components/Swim.jsx'
+import Bike from './components/Bike.jsx'
 
 //browser router
 const router = createBrowserRouter(
@@ -27,6 +28,7 @@ const router = createBrowserRouter(
         <Route path="/mansion" element={<Mansion />} />
         <Route path="/field_race" element={<Race />} />
         <Route path="/ocean_race" element={<Swim />} />
+        <Route path="/forest_race" element={<Bike />} />
     </Route>
   )
 )
