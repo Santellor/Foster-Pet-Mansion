@@ -1,12 +1,12 @@
 //dependency imports
-import '../race.css'
+import '../swim.css'
 import { useState, useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useSelector, useDispatch } from 'react-redux'
 import getPetImages from '../utils/getPetImages.js'
 import generateRandomPet from '../utils/genRandomPet.js'
 
-export default function Race(pet) {
+export default function Swim(pet) {
   //variables
   const hungerThreshold = 90
   const [timeUntilStart, setTimeUntilStart] = useState(3)
@@ -19,15 +19,15 @@ export default function Race(pet) {
 
   const petsToRace = useSelector((state) => state.petsToRace)
   const [competitors, setCompetitors] = useState([])
-  const [grassLine, setGrassLine] = useState((window.innerHeight - 230))
+  const [waterLine, setWaterLine] = useState((window.innerHeight - 230))
 
-  //calculate average pet speed -> used for calculating movement on movment tick
-  const averageSpeed = (pet) => {
+  //calculate average pet swim -> used for calculating movement on movment tick
+  const averageSwim = (pet) => {
     if (pet.hunger >= hungerThreshold) {
-        return Math.round(pet.speed)
+        return Math.round(pet.swim)
     }
     else {
-        return Math.round(pet.speed * (pet.hunger / 100))
+        return Math.round(pet.swim * (pet.hunger / 100))
     }
   }
 
@@ -40,10 +40,10 @@ export default function Race(pet) {
       const images = await getPetImages(pet)
       opps.push({
         name: pet.petName,
-        speed: averageSpeed(pet),
+        swim: averageSwim(pet),
         luck: pet.luck,
         x: 50,
-        y: grassLine,
+        y: waterLine,
         frontImages: [],
         backImages: [],
         frontAnim: 0,
@@ -59,10 +59,10 @@ export default function Race(pet) {
       const images = await getPetImages(pet)
       opps.push({
         name: `Competitor ${(opps.length-1) + 1}`,
-        speed: averageSpeed(pet),
+        swim: averageSwim(pet),
         luck: pet.luck,
         x: 50,
-        y: grassLine,
+        y: waterLine,
         frontImages: [],
         backImages: [],
         frontAnim: 0,
@@ -80,7 +80,6 @@ export default function Race(pet) {
     const randomChanceValue = Math.floor(Math.random() * (trackLength*(unluckFactor*10))) + 1; // Random number between 1 and 1100
 
     // Calculate the threshold based on track length
-
     return randomChanceValue <= pet.luck;
   }
 
@@ -166,10 +165,10 @@ export default function Race(pet) {
 
           if (!raceOver) {
             competitors.forEach(data => {
-              let { frontImages, backImages, x, y, speed } = data;
+              let { frontImages, backImages, x, y, swim } = data;
 
               if (!raceOver) {
-                x += (speed / movementTick);
+                x += (swim / movementTick);
       
                 if (x > canvasWidth) {
                   endRace(data)
@@ -229,6 +228,7 @@ export default function Race(pet) {
       payload: []
     })
 
+    console.log(competitors)
       // Example: Wait for 3 seconds (3000 milliseconds)
   setTimeout(() => {
     // Code to execute after waiting
@@ -260,7 +260,7 @@ export default function Race(pet) {
 
   //html rendering
   return (
-      <div className={`moving-background ${timeUntilStart <= 0 && !raceOver ? 'race-started' : ''}`}>
+      <div className={`swim-background ${timeUntilStart <= 0 && !raceOver ? 'swim-started' : ''}`}>
           <h1 className="test">{timeUntilStart <= 0 ? "Race underway" : `Race starting in ${timeUntilStart}`}</h1>
           <h1>{raceOver ? `${winner.name} was the winner!`: " "}</h1>
           <canvas id="canvas" width={1100} height={500}></canvas>
