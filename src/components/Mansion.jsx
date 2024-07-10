@@ -5,6 +5,7 @@ import { useDispatch, useSelector } from 'react-redux'
 import '../mansion.css'
 import Pet from './Pet'
 import Dropdown from './Dropdown'
+import PetTag from './PetTag'
 
 
 const Mansion = () => {
@@ -14,6 +15,7 @@ const Mansion = () => {
     const userId = useSelector((state) => state.userId)
     const petsToRace = useSelector((state) => state.petsToRace)
     const [currentPets, setCurrentPets] = useState([])
+    const [selectedPet, setSelectedPet] = useState([0])
     const [rawPets, setRawPets] = useState([])
     const [petOptions, setPetOptions] = useState([])
     const [loadingCoords, setLoadingCoords] = useState([150, 150, 150, 150, 150, 150, 150, 150, 150, 150, ])
@@ -99,7 +101,7 @@ const Mansion = () => {
             petDataFromBackEnd.forEach((pet, i) => {
                 // console.log(pet)
             
-                petsInMansion.push(< Pet 
+                petsInMansion.push(< PetTag 
                     pet={pet}
                     key={i}
                     feedPet={feedPet}
@@ -281,12 +283,12 @@ const createPet = (petName) => {
   if (rawPets.length > 0) {
     // console.log( `cooords`, loadingCoords)
     let grabbing
-    let hoverIndex = null
-    let hoverX = null
-    let hoverY = null
+    // let hoverIndex = null
+    // let hoverX = null
+    // let hoverY = null
     let grabIndex
-    let grabX = 100000
-    let grabY = 100000
+    let grabX = null
+    let grabY = null
     const mansion = document.getElementById("canvas")
 
     let relativeLoadingCoords = []
@@ -317,13 +319,14 @@ const createPet = (petName) => {
 
         let closest
         for (let i = 0; i < relativeLoadingCoords.length; i++ ) {
-          if (Math.abs(y-relativeLoadingYCoords[i])-10 < 10) {
+          if (Math.abs(y-relativeLoadingYCoords[i])-15 < 10) {
             if (Math.abs(x-relativeLoadingCoords[i])-10 < 10 && closest === undefined) closest = i
             else if (Math.abs(x-relativeLoadingCoords[i])-10 < 10 && Math.abs(x-relativeLoadingCoords[i]) < Math.abs(x-relativeLoadingCoords[closest])) closest = i
           } else {
           }
         }
           grabbing = true
+          setSelectedPet(closest)
           grabIndex = closest
         console.log(`closest`, grabIndex, grabbing)
     },false )
@@ -336,12 +339,12 @@ const createPet = (petName) => {
 
       x = x/3
       y = y/4.5
-      hoverX = x
-      hoverY = y
+      // hoverX = x
+      // hoverY = y
 
       let closest
       for (let i = 0; i < relativeLoadingCoords.length; i++ ) {
-        if (Math.abs(y-relativeLoadingYCoords[i])-10 < 10) {
+        if (Math.abs(y-relativeLoadingYCoords[i])-15 < 10) {
           if (Math.abs(x-relativeLoadingCoords[i])-10 < 10 && closest === undefined) closest = i
           else if (Math.abs(x-relativeLoadingCoords[i])-10 < 10 && Math.abs(x-relativeLoadingCoords[i]) < Math.abs(x-relativeLoadingCoords[closest])) closest = i
         } else {
@@ -352,21 +355,22 @@ const createPet = (petName) => {
       if (grabbing) {
         grabX = x
         grabY = y
-        hoverIndex = null
-        hoverX = null
+        // hoverIndex = null
+        // hoverX = null
         // console.log(`muaha`, x, `muaha`, y)
-      } else if (Math.abs(relativeLoadingCoords[closest]-x)-5 < 7 && Math.abs(relativeLoadingYCoords[closest]-y)-5 < 7) {
-        hoverIndex = closest
-        hoverX = x - 8
-        hoverY = y - 8
-        console.log(`hoverIndex`, hoverIndex)
-        console.log(`hoverX`, hoverX)
-      } else if (Math.abs(relativeLoadingCoords[hoverIndex]-hoverX)-5 > 7 && Math.abs(relativeLoadingYCoords[hoverIndex]-hoverY)-5 > 7) {
-        hoverIndex = null
-        hoverX = null
-        console.log(`hoverIndex`, hoverIndex)
-        console.log(`hoverX`, hoverX)
-      }
+      } 
+      // else if (Math.abs(relativeLoadingCoords[closest]-x-10) <= 5 && Math.abs(relativeLoadingYCoords[closest]-y-10) <= 5) {
+      //   hoverIndex = closest
+      //   hoverX = x - 10
+      //   hoverY = y - 10
+      //   console.log(`hoverIndex`, hoverIndex)
+      //   console.log(`hoverX`, hoverX, Math.abs(relativeLoadingCoords[closest]-x-10), hoverY, Math.abs(relativeLoadingYCoords[closest]-y-10))
+      // } else if (Math.abs(relativeLoadingCoords[hoverIndex]-hoverX-10) > 5 || Math.abs(relativeLoadingYCoords[hoverIndex]-hoverY-10) > 5) {
+      //   hoverIndex = null
+      //   hoverX = null
+      //   console.log(`hoverIndex`, hoverIndex)
+      //   console.log(`hoverX`, hoverX, Math.abs(relativeLoadingCoords[closest]-x-10), hoverY, Math.abs(relativeLoadingYCoords[closest]-y-10))
+      // }
 
     
     },false )
@@ -374,10 +378,10 @@ const createPet = (petName) => {
     mansion.addEventListener('mouseup', (e) => {
       grabbing = false
       grabIndex = null
-      hoverX = null
-      hoverIndex = null
-      grabX = 100000
-      grabY = 100000
+      // hoverX = null
+      // hoverIndex = null
+      grabX = null
+      grabY = null
       console.log(`clearing`,)
     },false )
     
@@ -536,12 +540,12 @@ const createPet = (petName) => {
           }
         }
 
-        if (i === hoverIndex ) {
-          petsWithImages[i].isRunning = false
-          petsWithImages[i].runnerValue = 0
-        }
+        // if (i === hoverIndex ) {
+        //   petsWithImages[i].isRunning = false
+        //   petsWithImages[i].runnerValue = 0
+        // }
 
-        if (i === grabIndex ) {
+        if (i === grabIndex && grabX !== null) {
           petsWithImages[i].isRunning = false
           petsWithImages[i].runnerValue = 0
           if (grabX < 1000){
@@ -579,11 +583,11 @@ const createPet = (petName) => {
         }
       }
 
-      if (hoverIndex !== null) {
-        console.log(`hoverX`, hoverX)
-        petsWithImages[hoverIndex].x = hoverX
-        newloadingCoords[hoverIndex] = hoverX
-      }
+      // if (hoverIndex !== null) {
+      //   console.log(`hoverX`, hoverX)
+      //   petsWithImages[hoverIndex].x = hoverX
+      //   newloadingCoords[hoverIndex] = hoverX
+      // }
       
       setLoadingCoords(newloadingCoords)
       relativeLoadingCoords = [...newloadingCoords]
@@ -613,6 +617,7 @@ const createPet = (petName) => {
         {rawPets.length < 10 ? <button onClick={() => createPet(`new pet`)}>adopt a pet</button> : <span> you may only have 10 pets</span>}
         < Dropdown options = {rawPets} />
         <button onClick={(() => navigate('/field_race'))}>race these pets!</button>
+        {currentPets[selectedPet]}
         <div className='mansion-backdrop'>
             <canvas id="canvas" style={{height: 600, width: 900}}></canvas>
         </div>

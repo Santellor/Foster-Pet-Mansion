@@ -8,3 +8,7 @@
     background-repeat: no-repeat;
     background-position: center;
 }
+
+.needs-padding {
+    padding: 2px;
+}

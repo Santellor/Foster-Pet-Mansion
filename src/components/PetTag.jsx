@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import '../mansion.css'
 
 const PetTag = ({ pet, feedPet, renamePet, rehomePet }) => {
     const [changedName, setChangedName] = useState('')
@@ -47,16 +48,29 @@ const PetTag = ({ pet, feedPet, renamePet, rehomePet }) => {
 
   return (
     <div> 
-        <br />
         {naming?  <> <input type='text' value={changedName} onChange={(e) => setChangedName(e.target.value)}/> <button onClick={completeNaming}>rename</button> </> 
-        : <>  {pet.petName}   <button onClick={startNaming} >rename</button> </> } <br /> 
-        hunger: {pet.hunger} <button onClick={() => feedPet(callbackId, callbackHunger)}>feed me</button> <br />
-        speed: {pet.speed} <br />
-        swim: {pet.swim} <br />
-        jump: {pet.jump} <br />
-        luck: {pet.luck} <br />
-        front: {pet.frontHalf} <br />
-        back: {pet.backHalf} <br />
+        : <>  {pet.petName}   <button onClick={startNaming} >rename</button> </> } 
+        <span className='needs-padding'>
+            hunger: {pet.hunger} <button onClick={() => feedPet(callbackId, callbackHunger)}>feed me</button>
+        </span>
+        <span className='needs-padding'>
+            speed: {pet.speed}
+        </span>
+        <span className='needs-padding'>
+            swim: {pet.swim}
+        </span>
+        <span className='needs-padding'>
+            jump: {pet.jump}
+        </span>
+        <span className='needs-padding'>
+            luck: {pet.luck}
+        </span>
+        <span className='needs-padding'>
+            front: {pet.frontHalf}
+        </span>
+        <span className='needs-padding'>
+            back: {pet.backHalf}
+        </span>
         {rehomingButtons}
     </div>
   )
