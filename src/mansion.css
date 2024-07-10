@@ -4,6 +4,11 @@
     background-image: url('../mansion.jpg');
     margin: 0;
     padding: 0;
-    background-size:cover;
+    background-size:contain;
+    background-repeat: no-repeat;
     background-position: center;
+}
+
+.needs-padding {
+    padding: 2px;
 }
