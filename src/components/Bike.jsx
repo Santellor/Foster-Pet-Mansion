@@ -18,8 +18,9 @@ export default function Bike(pet) {
   const dispatch = useDispatch()
 
   const petsToRace = useSelector((state) => state.petsToRace)
+  const timer = useSelector((state) => state.timer)
   const [competitors, setCompetitors] = useState([])
-  const [grassLine, setGrassLine] = useState((window.innerHeight - 350))
+  const [grassLine, setGrassLine] = useState((290))
   const [bikeImages, setBikeImages] = useState(([]))
 
   //convert pet data to pet object
@@ -29,40 +30,55 @@ export default function Bike(pet) {
     //convert pets from mansion
     for (const pet of pets) {
       const images = await getPetImages(pet)
+      let yVal = grassLine
+      if (timer >= 0) {
+        yVal -= 40
+      }
       opps.push({
-        name: pet.petName,
+        name: pet.name,
+        hunger: pet.hunger,
         speed: Math.floor(Math.random() * (15 - 5 + 1)) + 5,
         luck: pet.luck,
         x: 50,
-        y: grassLine,
+        y: yVal,
         frontImages: [],
         backImages: [],
         frontAnim: 0,
         backAnim: 0,
         frontAnimations: images[0],
         backAnimations: images[1],
+        id: pet.id,
+        headStart: 0,
+        frontHalf: pet.frontHalf,
+        backHalf: pet.backHalf,
+        hasWon: false,
         bikeAnim: 0
       })
     }
 
     //fill missing competitors with randomly generated pets
-    while (opps.length < 5) {
-      const pet = generateRandomPet()
-      const images = await getPetImages(pet)
-      opps.push({
-        name: `Competitor ${(opps.length-1) + 1}`,
-        speed: Math.floor(Math.random() * (15 - 5 + 1)) + 5,
-        luck: pet.luck,
-        x: 50,
-        y: grassLine,
-        frontImages: [],
-        backImages: [],
-        frontAnim: 0,
-        backAnim: 0,
-        frontAnimations: images[0],
-        backAnimations: images[1],
-        bikeAnim: 0
-      })
+    if (timer < 0) {
+      while (opps.length < 5) {
+        const pet = generateRandomPet()
+        const images = await getPetImages(pet)
+        opps.push({
+          name: `Competitor ${(opps.length-1) + 1}`,
+          hunger: pet.hunger,
+          speed: Math.floor(Math.random() * (15 - 5 + 1)) + 5,
+          luck: pet.luck,
+          x: 50,
+          y: grassLine,
+          frontImages: [],
+          backImages: [],
+          frontAnim: 0,
+          backAnim: 0,
+          frontAnimations: images[0],
+          backAnimations: images[1],
+          frontHalf: pet.frontHalf,
+          backHalf: pet.backHalf,
+          bikeAnim: 0
+        })
+      }
     }
     setCompetitors(opps)
   }
@@ -184,9 +200,9 @@ export default function Bike(pet) {
                 if (x > canvasWidth - 64) {
                   endRace(data)
                 }
-                if (x > canvasWidth - 64) {
-                  x = -64;
-                }
+                // if (x > canvasWidth - 64) {
+                //   x = -64;
+                // }
 
                 //bike animations
                 if (data.bikeAnim > 1) {
@@ -226,7 +242,6 @@ export default function Bike(pet) {
   // useEffect to run code after component mounts
   useEffect(() => {
       if (timeUntilStart <= 0) {
-          console.log('Countdown finished!');
           return;
       }
 
@@ -236,6 +251,22 @@ export default function Bike(pet) {
 
       return () => clearInterval(intervalId);
   }, [timeUntilStart]);
+
+    //triathlon speed timer
+    useEffect(() => {
+      let i = 1
+      if (timeUntilStart <= 0 && timer >= 0 && !raceOver) {
+        const intervalId = setInterval(() => {
+            dispatch({
+              type: "TRIATHLON",
+              payload: timer + i
+            })
+            i++
+        }, 10);
+  
+        return () => clearInterval(intervalId);
+      }
+  }, [timeUntilStart, raceOver]);
 
   //execute win sequence
   const endRace = (winner) => {
@@ -271,6 +302,24 @@ export default function Bike(pet) {
     }, 1);
   }
 
+  const formatTime = (hundredths) => {
+    // Convert hundredths of a second to milliseconds
+    let milliseconds = hundredths * 10;
+
+    // Calculate minutes, seconds, and hundredths of a second
+    let minutes = Math.floor(milliseconds / (60 * 1000));
+    let seconds = Math.floor((milliseconds % (60 * 1000)) / 1000);
+    let hundredthsOfSecond = Math.floor((milliseconds % 1000) / 10);
+
+    // Ensure two-digit formatting for minutes, seconds, and hundredths of a second
+    let formattedMinutes = minutes.toString().padStart(2, '0');
+    let formattedSeconds = seconds.toString().padStart(2, '0');
+    let formattedHundredths = hundredthsOfSecond.toString().padStart(2, '0');
+
+    // Return formatted time string with MM:SS:mm format
+    return `${formattedMinutes}:${formattedSeconds}:${formattedHundredths}`;
+  };
+
   const toMansion = () => {
     navigate('/mansion')
   }
@@ -279,6 +328,7 @@ export default function Bike(pet) {
   return (
       <div className={`bike-background ${timeUntilStart <= 0 && !raceOver ? 'bike-started' : ''}`}>
           <h1 className="test">{timeUntilStart <= 0 ? "Race underway" : `Race starting in ${timeUntilStart}`}</h1>
+          <h3>{timer >= 0 ? formatTime(timer) : ""}</h3>
           <h1>{raceOver ? `${winner.name} was the winner!`: " "}</h1>
           <canvas id="canvas" width={1250} height={500}></canvas>
           { raceOver ? <button onClick={toMansion}>Return to Mansion</button> : <></>}
