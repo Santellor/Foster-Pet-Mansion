@@ -289,15 +289,36 @@ const createPet = (petName) => {
     let grabIndex
     let grabX = null
     let grabY = null
+    let dpi = window.devicePixelRatio
     const mansion = document.getElementById("canvas")
+    const mansionBox = mansion.getBoundingClientRect()
+      const mansionWidth = mansionBox.right-mansionBox.left 
+      const mansionHeight = mansionBox.bottom-mansionBox.top 
+    
 
+    //scale the canvas
+    canvas.setAttribute('width', mansionWidth * dpi);
+    canvas.setAttribute('height', mansionHeight * dpi);
+    
+    console.log(mansion.width, mansion.height)
+    let leftBound = mansion.width/6
+    let rightBound = mansion.width - leftBound
+    let topBound = mansion.height/10
+    let bottomBound = mansion.height - topBound
+    let ground = mansion.height - topBound * 2 
+    let roof = topBound * 2
+    let petHeight = mansion.height/10
+    let petWidth = mansion.width/10
+    console.log(`dpi`, dpi)
     let relativeLoadingCoords = []
     let relativeLoadingYCoords = []
 
     for (let i = 0; i < rawPets.length; i++) {
-      console.log(mansion.width)
-      relativeLoadingCoords.push(Math.floor((mansion.width - 60)/ rawPets.length) * i + 60)
+      relativeLoadingCoords.push(Math.floor((mansion.width - 2*leftBound)/rawPets.length) * (i+1))
+      relativeLoadingYCoords.push(ground)
     }
+
+
 
     console.log(relativeLoadingCoords)
     console.log(`rawPets`, rawPets)
@@ -307,10 +328,11 @@ const createPet = (petName) => {
         let x = e.clientX - rect.left / (rect.right - rect.left) * mansion.width
         let y = e.clientY - rect.top / (rect.bottom - rect.top) * mansion.height
 
-        x = x/3
-        y = y/4.5
+        x = Math.floor(x*dpi)
+        y = Math.floor(y*dpi)
         
         console.log(`x`, x, `y`, y)
+        
         console.log(`relLoadingCoords`, relativeLoadingCoords)
         console.log(`relLoadingYCoords`, relativeLoadingYCoords)
 
@@ -337,8 +359,8 @@ const createPet = (petName) => {
       let x = e.clientX - rect.left / (rect.right - rect.left) * mansion.width
       let y = e.clientY - rect.top / (rect.bottom - rect.top) * mansion.height
 
-      x = x/3
-      y = y/4.5
+      x = Math.floor(x*dpi)
+      y = Math.floor(y*dpi)
       // hoverX = x
       // hoverY = y
 
@@ -388,15 +410,22 @@ const createPet = (petName) => {
     const ctx = mansion.getContext("2d")
     ctx.imageSmoothingEnabled = false
     ctx.scale(1,1)
-    
+
+    console.log(`leftBound`, leftBound)
+    console.log(`rightBound`, rightBound)
+    console.log(`topBound`, topBound)
+    console.log(`bottomBound`, bottomBound,)
+    console.log(`ground`, ground)
+    console.log(`roof`, roof)
+
     const petCoords = rawPets.map((pet, i) => {
       // console.log(`pet`, pet, `i`, i)
-
-      relativeLoadingYCoords.push(110)
+      console.log(relativeLoadingCoords)
       return pet = {
         petName: pet.petName,
-        x: loadingCoords ?? relativeLoadingCoords[i],
-        y: 110,   
+        x: relativeLoadingCoords[i],
+        y: relativeLoadingYCoords[i], 
+        speed: pet.speed  
       }
       
     })
@@ -410,12 +439,12 @@ const createPet = (petName) => {
 
     let petsWithImages = petCoords.map((pet) => {
       const image = new Image()
-      image.src = "/frontRock.png" 
+      image.src = "/frontRock0.png" 
 
         pet.front = image
       
       const image2 = new Image()
-      image2.src = "/backRock.png" 
+      image2.src = "/backRock0.png" 
 
         pet.back = image2
       
@@ -435,20 +464,21 @@ const createPet = (petName) => {
       // console.log(`new drawing`)
         if (pet.direction === 'right') {
           // console.log(pet.direction, `x`, pet.x)
-          ctx.drawImage(pet.front, pet.x , pet.y , 24, 16)
-          ctx.drawImage(pet.back, pet.x , pet.y , 24, 16)
+          ctx.drawImage(pet.front, pet.x , pet.y , petWidth, petHeight)
+          ctx.drawImage(pet.back, pet.x , pet.y , petWidth, petHeight)
         } else {
           ctx.scale(-1,1)
+          ctx.trans
           // console.log(pet.direction, `x`, pet.x)
-          ctx.drawImage(pet.front, -pet.x - 20, pet.y , 24, 16)
-          ctx.drawImage(pet.back, -pet.x - 20, pet.y , 24, 16)
+          ctx.drawImage(pet.front, -pet.x-petWidth, pet.y , petWidth, petHeight)
+          ctx.drawImage(pet.back, -pet.x-petWidth, pet.y , petWidth, petHeight)
         }
 
         ctx.restore()
 
       }
 
-    let randomWander = [ -1, -1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1,]
+    let randomWander = [ -2, -0.01, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0.01, 2,]
     let randomWanderIndex = Math.floor(Math.random()*randomWander.length)
     let randomWanderIndex2 = Math.floor(Math.random()*randomWander.length)
     let randomWanderIndex3 = Math.floor(Math.random()*randomWander.length)
@@ -463,16 +493,16 @@ const createPet = (petName) => {
     let newloadingYCoords = [...relativeLoadingYCoords]
 
     newloadingCoords[randomPetIndex] = randomWander[randomWanderIndex] + relativeLoadingCoords[randomPetIndex]
-    if (newloadingCoords[randomPetIndex] < 60) newloadingCoords[randomPetIndex] = 60
-    if (newloadingCoords[randomPetIndex] > 220 ) newloadingCoords[randomPetIndex] = 220 
+    if (newloadingCoords[randomPetIndex] < leftBound) newloadingCoords[randomPetIndex] = leftBound
+    if (newloadingCoords[randomPetIndex] > rightBound ) newloadingCoords[randomPetIndex] = rightBound 
     if (randomWander[randomWanderIndex] < 0) {petsWithImages[randomPetIndex].direction = `left`}
     if (randomWander[randomWanderIndex] > 0) {petsWithImages[randomPetIndex].direction = `right`}
     petsWithImages[randomPetIndex].x = newloadingCoords[randomPetIndex]
     
     if (petsWithImages.length > 3) {
       newloadingCoords[randomPetIndex2] = randomWander[randomWanderIndex2] + relativeLoadingCoords[randomPetIndex2]
-      if (newloadingCoords[randomPetIndex2] < 60) newloadingCoords[randomPetIndex2] = 60
-      if (newloadingCoords[randomPetIndex2] > 220 ) newloadingCoords[randomPetIndex2] = 220 
+      if (newloadingCoords[randomPetIndex2] < leftBound) newloadingCoords[randomPetIndex2] = leftBound
+      if (newloadingCoords[randomPetIndex2] > rightBound ) newloadingCoords[randomPetIndex2] = rightBound 
       if (randomWander[randomWanderIndex2] < 0) {petsWithImages[randomPetIndex2].direction = `left`}
       if (randomWander[randomWanderIndex2] > 0) {petsWithImages[randomPetIndex2].direction = `right`}
       petsWithImages[randomPetIndex2].x = newloadingCoords[randomPetIndex2]
@@ -480,8 +510,8 @@ const createPet = (petName) => {
 
     if (petsWithImages.length > 6) {
       newloadingCoords[randomPetIndex3] = randomWander[randomWanderIndex3] + relativeLoadingCoords[randomPetIndex3]
-      if (newloadingCoords[randomPetIndex3] < 60) newloadingCoords[randomPetIndex3] = 60
-      if (newloadingCoords[randomPetIndex3] > 220 ) newloadingCoords[randomPetIndex3] = 220 
+      if (newloadingCoords[randomPetIndex3] < leftBound) newloadingCoords[randomPetIndex3] = leftBound
+      if (newloadingCoords[randomPetIndex3] > rightBound ) newloadingCoords[randomPetIndex3] = rightBound 
       if (newloadingCoords[randomPetIndex3] < relativeLoadingCoords[randomPetIndex3]) {petsWithImages[randomPetIndex3].direction = `left`}
       if (newloadingCoords[randomPetIndex3] > relativeLoadingCoords[randomPetIndex3]) {petsWithImages[randomPetIndex3].direction = `right`}
       petsWithImages[randomPetIndex3].x = newloadingCoords[randomPetIndex3]
@@ -489,8 +519,8 @@ const createPet = (petName) => {
     
     if (petsWithImages.length > 8) {    
       newloadingCoords[randomPetIndex4] = randomWander[randomWanderIndex4] + relativeLoadingCoords[randomPetIndex4]
-      if (newloadingCoords[randomPetIndex4] < 60) newloadingCoords[randomPetIndex4] = 60
-      if (newloadingCoords[randomPetIndex4] > 220 ) newloadingCoords[randomPetIndex4] = 220 
+      if (newloadingCoords[randomPetIndex4] < leftBound) newloadingCoords[randomPetIndex4] = leftBound
+      if (newloadingCoords[randomPetIndex4] > rightBound ) newloadingCoords[randomPetIndex4] = rightBound 
       if (newloadingCoords[randomPetIndex4] < relativeLoadingCoords[randomPetIndex4]) {petsWithImages[randomPetIndex4].direction = `left`}
       if (newloadingCoords[randomPetIndex4] > relativeLoadingCoords[randomPetIndex4]) {petsWithImages[randomPetIndex4].direction = `right`}
       petsWithImages[randomPetIndex4].x = newloadingCoords[randomPetIndex4]
@@ -498,17 +528,18 @@ const createPet = (petName) => {
     }
 
     let runnerIndex = null // initialize a variable to select a random pet
+    
     let runnerRand = Math.random() // random roll to see if a pet starts running
     // console.log(`runnerRand`, runnerRand)
     
    
-    let runnerValue = -2 // set the default pet running movement to be 3 to the left
+    let runnerValue = -5 // set the default pet running movement to be 3 to the left
     if (runnerRand < 0.2 ) { // if the random roll is less than .2
       // console.log(`runner chosen`)
 
       runnerIndex = Math.floor(Math.random()*rawPets.length) // roll a random indexed pet to be a runner
       // console.log(`runnerIndex`, runnerIndex)
-      if (petsWithImages[runnerIndex].direction === 'right') { runnerValue = 2 } // if the pet's direction is right, have them move 3 to the right
+      if (petsWithImages[runnerIndex].direction === 'right') { runnerValue = 5 } // if the pet's direction is right, have them move 3 to the right
       petsWithImages[runnerIndex].isRunning = true
       petsWithImages[runnerIndex].runnerValue = runnerValue
     } 
@@ -521,47 +552,48 @@ const createPet = (petName) => {
       petsWithImages[runnerIndex].runnerValue = 0
     }
       
-      // console.log(`runnerIndex`, runnerIndex)      
+      // console.log(`runnerIndex`, runnerIndex)  
+      
+      console.log(`grabing`, grabIndex, `at`, grabX, grabY )
 
       for (let i = 0; i < petsWithImages.length; i++ ) {
         let runner = petsWithImages[i]
         // console.log(runner.isRunning)
 
-        if (newloadingYCoords[i] < 110 && newloadingYCoords[i] > 30) {
+        if (newloadingYCoords[i] < ground && newloadingYCoords[i] > roof) {
           console.log(`should be dropping`)
-          if ( newloadingYCoords > 1000 ){
+          
 
-          } else if (newloadingYCoords[i] + 10 > 110) {
-          newloadingYCoords[i] = 110
-          petsWithImages[i].y = 110
+          } else if (newloadingYCoords[i] + 10 > ground) {
+          newloadingYCoords[i] = ground
+          petsWithImages[i].y = ground
           } else {
           newloadingYCoords[i] = newloadingYCoords[i] + 10
           petsWithImages[i].y = petsWithImages[i].y + 10
           }
-        }
+        
 
         // if (i === hoverIndex ) {
         //   petsWithImages[i].isRunning = false
         //   petsWithImages[i].runnerValue = 0
         // }
-
         if (i === grabIndex && grabX !== null) {
           petsWithImages[i].isRunning = false
           petsWithImages[i].runnerValue = 0
-          if (grabX < 1000){
-              if (grabX > 230) grabX = 230
-              if (grabX < 60) grabX = 60
-          }
-          if (grabY < 1000) {
-            if (grabY > 140) grabY = 140
-            if (grabY < 10) grabY = 10
-          }
-
-          petsWithImages[i].x = grabX - 10
-          petsWithImages[i].y = grabY - 10
-          newloadingCoords[i] = grabX - 10
-          newloadingYCoords[i] = grabY - 10          
-        }
+          
+              if (grabX > rightBound) grabX = rightBound
+              if (grabX < leftBound) grabX = leftBound
+              
+              if (grabY < topBound) grabY = topBound
+              if (grabY > bottomBound) grabY = bottomBound
+              
+              
+              petsWithImages[i].x = grabX - 10
+              petsWithImages[i].y = grabY - 10
+              newloadingCoords[i] = grabX - 10
+              newloadingYCoords[i] = grabY - 10          
+              
+            }
         
         if (runner.isRunning) {
         // console.log(`runner`, runner)
@@ -571,13 +603,13 @@ const createPet = (petName) => {
         
         newloadingCoords[i] = runner.runnerValue + newloadingCoords[i]
         
-        if (newloadingCoords[i] < 60) {newloadingCoords[i] = 60
+        if (newloadingCoords[i] < leftBound) {newloadingCoords[i] = leftBound
           petsWithImages[i].direction = `right`
-          petsWithImages[i].runnerValue = 2
+          petsWithImages[i].runnerValue = 5
         }
-        if (newloadingCoords[i ] > 220) {newloadingCoords[i ] = 220
+        if (newloadingCoords[i ] > rightBound) {newloadingCoords[i ] = rightBound
           petsWithImages[i].direction = `left`
-          petsWithImages[i].runnerValue = -2
+          petsWithImages[i].runnerValue = -5
         }
         petsWithImages[i].x = newloadingCoords[i]
         }
@@ -588,16 +620,13 @@ const createPet = (petName) => {
       //   petsWithImages[hoverIndex].x = hoverX
       //   newloadingCoords[hoverIndex] = hoverX
       // }
-      
+      console.log(newloadingCoords)
+      console.log(newloadingYCoords)
+      relativeLoadingYCoords[1] = 1000
       setLoadingCoords(newloadingCoords)
       relativeLoadingCoords = [...newloadingCoords]
       relativeLoadingYCoords = [...newloadingYCoords]
     }, 80)
-
-    // setInterval( ()=> {
-    //   setStateRunnerIndex(null)
-    //   console.log(`clearedRunnerIndex`)
-    // }, 4000 )
 
     return () => {clearInterval(intervalId)
     }
@@ -605,21 +634,16 @@ const createPet = (petName) => {
     
 }, [rawPets])
 
-
-    
-  // ctx.drawImage("/backRock.png", 200, 150, 32, 32)
-  // ctx.drawImage("/frontRock.png", 200, 150, 32, 32)
-    
   return (
     <div >
-        <div width="100%" height='100%'>Mansion</div>
+        <div>Mansion</div>
         <button onClick={handleLogout}>log out</button>
         {rawPets.length < 10 ? <button onClick={() => createPet(`new pet`)}>adopt a pet</button> : <span> you may only have 10 pets</span>}
         < Dropdown options = {rawPets} />
         <button onClick={(() => navigate('/field_race'))}>race these pets!</button>
         {currentPets[selectedPet]}
         <div className='mansion-backdrop'>
-            <canvas id="canvas" style={{height: 600, width: 900}}></canvas>
+            <canvas id="canvas" className='canvas'></canvas>
         </div>
     </div>
   )
