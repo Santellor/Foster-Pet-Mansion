@@ -11,6 +11,7 @@ export default function Bike(pet) {
   const hungerThreshold = 90
   const [timeUntilStart, setTimeUntilStart] = useState(3)
   const [raceOver, setRaceOver] = useState(false)
+  const [triathlonEnded, setTriathlonEnded] = useState(false)
   const [winner, setWinner] = useState("")
   const movementTick = 10
 
@@ -39,7 +40,7 @@ export default function Bike(pet) {
         hunger: pet.hunger,
         speed: Math.floor(Math.random() * (15 - 5 + 1)) + 5,
         luck: pet.luck,
-        x: 50,
+        x: 50 + pet.headStart,
         y: yVal,
         frontImages: [],
         backImages: [],
@@ -88,10 +89,21 @@ export default function Bike(pet) {
     const unluckFactor = 23
     const randomChanceValue = Math.floor(Math.random() * (trackLength*(unluckFactor*10))) + 1; // Random number between 1 and 1100
 
-    // Calculate the threshold based on track length
-
+    if (randomChanceValue <= pet.luck) {
+      pet.x = 1250
+    }
     return randomChanceValue <= pet.luck;
   }
+
+  const randomMovement = (pet) => {
+    const randomNum = Math.floor(Math.random() * (100 + pet.luck)) + 1;
+
+    if (randomNum <= 90) {
+      return 0;
+    } else if (randomNum <= (100 + pet.luck)) {
+      return 1;
+    }
+  };
 
   //pets taking hunger after an event
   const takeHunger = (pet) => {
@@ -195,7 +207,7 @@ export default function Bike(pet) {
               let { frontImages, backImages, x, y, speed } = data;
 
               if (!raceOver) {
-                x += (speed / movementTick);
+                x += (speed / movementTick) + (randomMovement(data) / movementTick);
       
                 if (x > canvasWidth - 64) {
                   endRace(data)
@@ -270,36 +282,91 @@ export default function Bike(pet) {
 
   //execute win sequence
   const endRace = (winner) => {
-    setRaceOver(true)
-    setWinner(winner)
-    dispatch({
-      type: `RACE_PETS`,
-      payload: []
-    })
+    for (const pet of petsToRace) {
+      //traditional race ending
+      if (timer < 0) {
+        setRaceOver(true)
+        setWinner(winner)
+        dispatch({
+          type: `RACE_PETS`,
+          payload: []
+        })
+        
+        //finish winning drawings
+        setTimeout(() => {
+          const canvas = document.getElementById('canvas')
+          const ctx = canvas.getContext("2d");
+          ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-      // Example: Wait for 3 seconds (3000 milliseconds)
-  setTimeout(() => {
-    // Code to execute after waiting
+          competitors.forEach((data) => {
+            if (data.name != winner.name) {
+              ctx.drawImage(data.frontImages[0], data.x, (data.y-58), 64, 64)
+              ctx.drawImage(data.backImages[0], data.x, (data.y-58), 64, 64)
+            }
+          })
 
-    const canvas = document.getElementById('canvas')
-    const ctx = canvas.getContext("2d");
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-    competitors.forEach((data) => {
-      if (data.name != winner.name) {
-        ctx.drawImage(data.frontImages[0], data.x, (data.y-58), 64, 64)
-        ctx.drawImage(data.backImages[0], data.x, (data.y-58), 64, 64)
+        const image = new Image();
+        image.src = "/crown.png";
+        image.onload = () => {
+            ctx.drawImage(winner.frontImages[0], 600, 150, 64, 64);
+            ctx.drawImage(winner.backImages[0], 600, 150, 64, 64);  
+            ctx.drawImage(image, 600, 107, 64, 64); // Draw crown after winner's avatar
+        };
+        }, 1);
       }
-    })
 
-    const image = new Image();
-    image.src = "/crown.png";
-    image.onload = () => {
-        ctx.drawImage(winner.frontImages[0], 600, 150, 64, 64);
-        ctx.drawImage(winner.backImages[0], 600, 150, 64, 64);  
-        ctx.drawImage(image, 600, 107, 64, 64); // Draw crown after winner's avatar
-    };
-    }, 1);
+      //triathlon ending
+      if (timer >= 0) {
+        setRaceOver(true)
+        setWinner(winner)
+        setTimeout(() => {
+
+          //triathlon ending ceremony
+          const canvas = document.getElementById('canvas')
+          const ctx = canvas.getContext("2d");
+          ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+          //place and draw top 3 competitors
+          setTimeout(() => {
+            const placement = competitors.sort((pet1, pet2) => pet2.x - pet1.x);
+
+            const image = new Image();
+            image.src = "/bronzePodium.png";
+            image.onload = () => {
+                ctx.drawImage(placement[2].frontImages[0], 702, 126, 64, 64);
+                ctx.drawImage(placement[2].backImages[0], 702, 126, 64, 64);  
+                ctx.drawImage(image, 700, 150, 64, 64);
+            };
+
+            setTimeout(() => {
+              const image = new Image();
+              image.src = "/silverPodium.png";
+              image.onload = () => {
+                  ctx.drawImage(placement[1].frontImages[0], 502, 118, 64, 64);
+                  ctx.drawImage(placement[1].backImages[0], 502, 118, 64, 64);  
+                  ctx.drawImage(image, 500, 150, 64, 64);
+              };
+  
+              setTimeout(() => {
+                const image = new Image();
+                image.src = "/goldPodium.png";
+                image.onload = () => {
+                    ctx.drawImage(placement[0].frontImages[0], 602, 107, 64, 64);
+                    ctx.drawImage(placement[0].backImages[0], 602, 107, 64, 64);  
+                    ctx.drawImage(image, 600, 150, 64, 64);
+                const image2 = new Image();
+                image2.src = "/crown.png";
+                image2.onload = () => {
+                    ctx.drawImage(image2, 602, 63, 64, 64);
+                };
+                };
+                setTriathlonEnded(true)
+              }, 2500)
+            }, 2500)
+          }, 2500)
+        }, 2)
+      }
+    }  
   }
 
   const formatTime = (hundredths) => {
@@ -329,7 +396,9 @@ export default function Bike(pet) {
       <div className={`bike-background ${timeUntilStart <= 0 && !raceOver ? 'bike-started' : ''}`}>
           <h1 className="test">{timeUntilStart <= 0 ? "Race underway" : `Race starting in ${timeUntilStart}`}</h1>
           <h3>{timer >= 0 ? formatTime(timer) : ""}</h3>
-          <h1>{raceOver ? `${winner.name} was the winner!`: " "}</h1>
+          <h1>{((raceOver && timer < 0) || (raceOver && triathlonEnded)) && (
+                `${winner.name} was the winner!`
+            )}</h1>
           <canvas id="canvas" width={1250} height={500}></canvas>
           { raceOver ? <button onClick={toMansion}>Return to Mansion</button> : <></>}
       </div>

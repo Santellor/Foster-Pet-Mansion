@@ -57,7 +57,9 @@ export default function Swim(pet) {
         backAnimations: images[1],
         id: pet.id,
         frontHalf: pet.frontHalf,
-        backHalf: pet.backHalf
+        backHalf: pet.backHalf,
+        hasWon: false,
+        headStart: 0
       })
     }
 
@@ -91,9 +93,21 @@ export default function Swim(pet) {
     const unluckFactor = 23
     const randomChanceValue = Math.floor(Math.random() * (trackLength*(unluckFactor*10))) + 1; // Random number between 1 and 1100
 
-    // Calculate the threshold based on track length
+    if (randomChanceValue <= pet.luck) {
+      pet.x = 1250
+    }
     return randomChanceValue <= pet.luck;
   }
+
+  const randomMovement = (pet) => {
+    const randomNum = Math.floor(Math.random() * (100 + pet.luck)) + 1;
+
+    if (randomNum <= 90) {
+      return 0;
+    } else if (randomNum <= (100 + pet.luck)) {
+      return 1;
+    }
+  };
 
   //pets taking hunger after an event
   const takeHunger = (pet) => {
@@ -180,7 +194,7 @@ export default function Swim(pet) {
               let { frontImages, backImages, x, y, swim } = data;
 
               if (!raceOver) {
-                x += (swim / movementTick);
+                x += (swim / movementTick) + (randomMovement(data) / movementTick);
 
                 if (swim === 0) {
                   x -= 2
@@ -287,23 +301,36 @@ export default function Swim(pet) {
 
       //triathlon ending
       if (timer >= 0 && typeof winner.id === 'number') {
-        endRace(true)
         setTimeout(() => {
-          competitors.forEach((data) => {
-            data.frontImages = []
-            data.backImages = []
-          })
+          const dupedArr = competitors.map(competitor => ({
+            ...competitor,
+            frontImages: [],
+            backImages: []
+          }));        
           dispatch({
             type: `RACE_PETS`,
-            payload: competitors
+            payload: dupedArr
           })
           navigate('/forest_race')
         }, 2)
       }
       if (typeof winner.id === 'string' && timer >= 0) {
         if (!winner.hasWon) {
-          winner.headStart = (100)
-          winner.hasWon = true
+          for (let i = 0; i < competitors.length; i++) {
+            const pet = competitors[i];
+            if (Number.isInteger(pet.id)) {
+                const chosen  = pet;
+                winner.headStart = (winner.x - chosen.x)
+                if (winner.headStart > 852) {
+                  winner.headStart = 852
+                }
+                if (winner.headStart < 0) {
+                  winner.headStart = 0
+                }
+                winner.hasWon = true
+                break; // Exit the loop as soon as we find a pet with an integer id
+            }
+          }
         }
       }
     }  

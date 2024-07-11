@@ -56,7 +56,7 @@ export default function Race(pet) {
       opps.push({
         name: pet.petName,
         hunger: pet.hunger,
-        speed: averageSpeed(pet),
+        speed: averageSpeed(pet)+5,
         luck: pet.luck,
         x: 50,
         y: yVal,
@@ -70,8 +70,9 @@ export default function Race(pet) {
         headStart: 0,
         frontHalf: pet.frontHalf,
         backHalf: pet.backHalf,
-        swim: averageSwim(pet),
-        hasWon: false
+        swim: averageSwim(pet)+5,
+        hasWon: false,
+        luckyWin: false
       })
     }
 
@@ -95,7 +96,8 @@ export default function Race(pet) {
           backAnimations: images[1],
           frontHalf: pet.frontHalf,
           backHalf: pet.backHalf,
-          swim: averageSwim(pet)
+          swim: averageSwim(pet),
+          luckyWin: false
         })
       }
     }
@@ -122,7 +124,8 @@ export default function Race(pet) {
           frontHalf: pet.frontHalf,
           backHalf: pet.backHalf,
           swim: averageSwim(pet),
-          hasWon: false
+          hasWon: false,
+          luckyWin: false
         })
       }
     }
@@ -135,9 +138,21 @@ export default function Race(pet) {
     const randomChanceValue = Math.floor(Math.random() * (trackLength*(unluckFactor*10))) + 1; // Random number between 1 and 1100
 
     // Calculate the threshold based on track length
-
+    if (randomChanceValue <= pet.luck) {
+      pet.x = 1250
+    }
     return randomChanceValue <= pet.luck;
   }
+
+  const randomMovement = (pet) => {
+    const randomNum = Math.floor(Math.random() * (100 + pet.luck)) + 1;
+
+    if (randomNum <= 90) {
+      return 0;
+    } else if (randomNum <= (100 + pet.luck)) {
+      return 1;
+    }
+  };
 
   //pets taking hunger after an event
   const takeHunger = (pet) => {
@@ -224,7 +239,7 @@ export default function Race(pet) {
               let { frontImages, backImages, x, y, speed } = data;
 
               if (!raceOver) {
-                x += (speed / movementTick);
+                x += (speed / movementTick) + (randomMovement(data) / movementTick);
 
                 if (speed === 0) {
                   x -= 2
@@ -331,23 +346,33 @@ export default function Race(pet) {
 
       //triathlon ending
       if (timer >= 0 && typeof winner.id === 'number') {
-        endRace(true)
         setTimeout(() => {
-          competitors.forEach((data) => {
-            data.frontImages = []
-            data.backImages = []
-          })
+          const dupedArr = competitors.map(competitor => ({
+            ...competitor,
+            frontImages: [],
+            backImages: []
+          }));      
           dispatch({
             type: `RACE_PETS`,
-            payload: competitors
+            payload: dupedArr
           })
           navigate('/ocean_race')
         }, 2)
       }
       if (typeof winner.id === 'string' && timer >= 0) {
         if (!winner.hasWon) {
-          winner.headStart += (100)
-          winner.hasWon = true
+          for (let i = 0; i < competitors.length; i++) {
+            const pet = competitors[i];
+            if (Number.isInteger(pet.id)) {
+                const chosen  = pet;
+                winner.headStart = (winner.x - chosen.x)
+                if (winner.headStart > 852) {
+                  winner.headStart = 852
+                }
+                winner.hasWon = true
+                break; // Exit the loop as soon as we find a pet with an integer id
+            }
+          }
         }
       }
     }  
