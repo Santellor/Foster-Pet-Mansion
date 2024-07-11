@@ -3,7 +3,8 @@ const initialState = {
     otherValue: "hello",
     username: null,
     loggedIn: false,
-    petsToRace: []
+    petsToRace: [],
+    timer: -1
 }
 
 export default function reducer(state = initialState, action) {
@@ -26,6 +27,11 @@ export default function reducer(state = initialState, action) {
             return {
                 ...state,
                 petsToRace: action.payload,
+            }
+        case "TRIATHLON":
+            return {
+                ...state,
+                timer: action.payload
             }
         default:
             return state
