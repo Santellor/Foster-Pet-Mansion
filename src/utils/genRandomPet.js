@@ -1,6 +1,6 @@
 const generateRandomPet = () => {
     const allSpecies = [
-        //{name: 'rock', weight: 500, speed: [0, 0], swim: [0, 0], jump: [0, 0], luck: [20, 20]},
+        {name: 'rock', weight: 500, speed: [0, 0], swim: [0, 0], jump: [0, 0], luck: [20, 20]},
         {name: 'pyro avigator', weight: 500, speed: [1, 9], swim: [1, 3], jump: [1, 9], luck: [1, 5]}
     ];
 
