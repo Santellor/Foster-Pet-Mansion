@@ -3,6 +3,7 @@ import { useDispatch } from 'react-redux'
 
 const Dropdown = ({options}) => {
 
+
     const [selectionArray, setSelectionArray] = useState([])
     const [positionArray, setPositionArray] = useState([])
     const [optionElements, setOptionElements] = useState([])
@@ -24,20 +25,30 @@ const Dropdown = ({options}) => {
             const newPositionArray = [...positionArray]
             newPositionArray[i] = false
             setPositionArray(newPositionArray)
-            // console.log(`a`, newSelectionArray, newPositionArray)
+            console.log(`a`, newSelectionArray, newPositionArray)
 
         } else if (selectionArray.length < 5) {
             const newSelectionArray = [...selectionArray]
-            newSelectionArray.push(options[i])
+            newSelectionArray.push({
+                petId: options[i].petId,
+                petName:options[i].petName,
+                hunger:options[i].hunger,
+                speed:options[i].speed,
+                swim:options[i].swim,
+                jump:options[i].jump,
+                luck:options[i].luck,
+                frontHalf:options[i].frontHalf,
+                backHalf:options[i].backHalf,  
+            })
             setSelectionArray(newSelectionArray)
 
             const newPositionArray = [...positionArray]
             newPositionArray[i] = true
             setPositionArray(newPositionArray)
-            // console.log(`b`, newSelectionArray, newPositionArray)
+            console.log(`b`, newSelectionArray, newPositionArray)
 
         } else {
-            // console.log(`c`)
+            console.log(`c`)
             setMessage('You cannot have more than 5 pets race together')
         }
         

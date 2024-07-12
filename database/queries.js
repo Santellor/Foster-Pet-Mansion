@@ -14,7 +14,8 @@ import {
 const viewPets = async (id) => {
     return await Pet.findAll({
         where: 
-            { userId: id}
+            { userId: id},
+        order: ['createdAt']
     })
 }
 
