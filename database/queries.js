@@ -19,13 +19,13 @@ const viewPets = async (id) => {
 }
 
 const viewUserMedals = async (id) => {
-    let medals = await User.findAll({
+    let medals = await MedalHandler.findAll({
         where: 
             { userId: id},
-        include: 
-            { model: Medal},
-        attributes:
-            { exclude: [`userId`, `email`, `username`, `password`, `createdAt`, `updatedAt` ] }
+        // include: 
+        //     { model: Medal},
+        // attributes:
+        //     { exclude: [`userId`, `email`, `username`, `password`, `createdAt`, `updatedAt` ] }
     })
 
     // sequelize stores these responses with cached values that are difficult to visualize
@@ -33,20 +33,21 @@ const viewUserMedals = async (id) => {
         // if there is a better way to specify attributes from eager loaded queries managed by a junction table,
         //then this is not necessary. for now, it works
 
-    medals = medals[0].medals
+    medals = medals.medals
 
     let skimmedMedals = []
     console.log(`achievements`, medals)
-    for (let medal of medals) {
+    // for (let medal of medals) {
 
-        let medalCopy = {...medal.dataValues}
-        delete medalCopy.medal_handler
-        medal = medalCopy
-        skimmedMedals.push(medal)
+    //     let medalCopy = {...medal.dataValues}
+    //     delete medalCopy.medal_handler
+    //     medal = medalCopy
+    //     skimmedMedals.push(medal)
     
-    }
-
-    return skimmedMedals
+    // }
+    console.log(medals)
+    return
+    //return skimmedMedals
 }
 
 const viewUserAchievements = async (id) => {

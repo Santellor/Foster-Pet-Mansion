@@ -56,7 +56,7 @@ export default function Race(pet) {
       opps.push({
         name: pet.petName,
         hunger: pet.hunger,
-        speed: averageSpeed(pet)+5,
+        speed: averageSpeed(pet),
         luck: pet.luck,
         x: 50,
         y: yVal,
@@ -70,7 +70,7 @@ export default function Race(pet) {
         headStart: 0,
         frontHalf: pet.frontHalf,
         backHalf: pet.backHalf,
-        swim: averageSwim(pet)+5,
+        swim: averageSwim(pet),
         hasWon: false,
         luckyWin: false
       })
@@ -136,10 +136,11 @@ export default function Race(pet) {
   const skipCourse = (pet, trackLength) => {
     const unluckFactor = 23
     const randomChanceValue = Math.floor(Math.random() * (trackLength*(unluckFactor*10))) + 1; // Random number between 1 and 1100
+    const canvas = document.getElementById('canvas')
 
     // Calculate the threshold based on track length
     if (randomChanceValue <= pet.luck) {
-      pet.x = 1250
+      pet.x = canvas.width - 64
     }
     return randomChanceValue <= pet.luck;
   }
