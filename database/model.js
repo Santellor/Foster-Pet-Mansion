@@ -131,13 +131,19 @@ export class MedalHandler extends Model {
 }
 
 MedalHandler.init(
-    {},
-    {
-      modelName: 'medal_handler',
-      sequelize: db,
-      timestamps: false,
-      updatedAt: false,
-    },
+  {
+    medalHandlerId: {
+      type: DataTypes.INTEGER,
+      autoIncrement: true,
+      primaryKey: true,
+  }
+   },
+  {
+    modelName: 'medal_handler',
+    sequelize: db,
+    timestamps: false,
+    updatedAt: false,
+  },
 );
 
 
@@ -193,8 +199,8 @@ Pet.belongsTo(User,  { foreignKey: 'userId' });
 
 // many to many relationship user <-> medal
     // create a junction table automatically for medals
-User.belongsToMany(Medal, {through: 'medal_handler', foreignKey: 'userId'})
-Medal.belongsToMany(User, {through: 'medal_handler', foreignKey: 'medalId'})
+    User.belongsToMany(Medal, {through: { model: 'medal_handler', unique: false}, foreignKey: 'userId'})
+    Medal.belongsToMany(User, {through: { model: 'medal_handler', unique: false}, foreignKey: 'medalId'})
 
 // many to many relationship user <-> achievement
     // create a junction table automatically for achievements
