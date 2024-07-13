@@ -15,7 +15,7 @@ const viewPets = async (id) => {
     return await Pet.findAll({
         where: 
             { userId: id},
-        order: ['createdAt']
+        order: ['petId']
     })
 }
 
@@ -23,64 +23,26 @@ const viewUserMedals = async (id) => {
     let medals = await MedalHandler.findAll({
         where: 
             { userId: id},
-        // include: 
-        //     { model: Medal},
-        // attributes:
-        //     { exclude: [`userId`, `email`, `username`, `password`, `createdAt`, `updatedAt` ] }
+        attributes:
+            { exclude: [`userId`, `medalHandlerId`] }
     })
 
-    // sequelize stores these responses with cached values that are difficult to visualize
-        // the following strips all but the current values of the data retrieved and returns it
-        // if there is a better way to specify attributes from eager loaded queries managed by a junction table,
-        //then this is not necessary. for now, it works
-
-    medals = medals.medals
-
-    let skimmedMedals = []
-    console.log(`achievements`, medals)
-    // for (let medal of medals) {
-
-    //     let medalCopy = {...medal.dataValues}
-    //     delete medalCopy.medal_handler
-    //     medal = medalCopy
-    //     skimmedMedals.push(medal)
-    
-    // }
     console.log(medals)
-    return
+    return medals
     //return skimmedMedals
 }
 
 const viewUserAchievements = async (id) => {
-    let achievements = await User.findAll({
+    let achievements = await AchievementHandler.findAll({
         where: 
             { userId: id},
-        include: 
-            { model: Achievement},
         attributes:
-            { exclude: [`userId`, `email`, `username`, `password`, `createdAt`, `updatedAt` ] }
+            { exclude: [`userId`, `achievementHandlerId`] }
     })
 
-    // sequelize stores these responses with cached values that are difficult to visualize
-        // the following strips all but the current values of the data retrieved and returns it
-        // if there is a better way to specify attributes from eager loaded queries managed by a junction table,
-        //then this is not necessary. for now, it works
-
-    achievements = achievements[0].achievements
-
-    let skimmedAchievements = []
-    console.log(`achievements`, achievements)
-    for (let achievement of achievements) {
-
-        console.log(`subset`, achievement)
-        let achievementCopy = {...achievement.dataValues}
-        delete achievementCopy.achievement_handler
-        achievement = achievementCopy
-        console.log(`subset 2`, achievement)
-        skimmedAchievements.push(achievement)
-    }
-
-    return skimmedAchievements
+    console.log(achievements)
+    return achievements
+    //return skimmedMedals
 }
 
 

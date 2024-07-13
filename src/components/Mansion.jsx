@@ -22,6 +22,7 @@ const Mansion = () => {
     const [loadingXCoords, setLoadingXCoords] = useState()
     const [loadingYCoords, setLoadingYCoords] = useState()
     const [petsLoaded, setPetsLoaded] = useState(false)
+    const [petIdArray, setPetIdArray] = useState([])
     
     // returns to the login page and clears state
     const handleLogout = async () => {
@@ -56,7 +57,6 @@ const Mansion = () => {
     //this function fetches the data for all pets belonging to the logged in user from the database. It also allows the user to feed and rename pets
       //TODO a pet / brush function would go here
     const loadPets = async () => {
-        // console.log(`userId`, userId)
         if (userId) {
             const {data} = await axios.get(`/api/get_pets/${userId}`)
             let petDataFromBackEnd = [...data.pets]
@@ -147,7 +147,6 @@ const Mansion = () => {
           } else {
             let imageSources = await getPetImages(petDataFromBackEnd[i])
             imageSources = imageSources.flat()
-            // console.log(imageSources)
 
             let front0 = await createImage(imageSources[0])
             let front1 = await createImage(imageSources[1])
@@ -160,11 +159,8 @@ const Mansion = () => {
         }
 
         await Promise.all(petDataFromBackEnd.map( async (pet, i) => {
-            // console.log(pet)
             
-            const images = await loadImages(i)
-            console.log(`pet.petName`, pet.petName)
-            
+            const images = await loadImages(i)            
             petDataFromBackEnd[i].front0 = images[0]
             petDataFromBackEnd[i].front1 = images[1]
             petDataFromBackEnd[i].back0 = images[2]
@@ -220,8 +216,6 @@ const Mansion = () => {
         let statRoll = Math.random() * (statArray[1] + 0.99 - statArray[0]) + statArray[0];
         // turn the result into a simple integer
         let result = Math.floor(statRoll);
-        // console.log(`stat`, stat, `Array`, statArray);
-        // console.log(`result`, result);
         newPet[stat] = result
       };
 
@@ -231,7 +225,6 @@ const Mansion = () => {
         body.entry = entry
         await axios.post(`/api/post_pet`, body)   
       }
-      // console.log(newPet)
 
       // await the creation of a new pet in the database, then load the pets
       await addPetToDB(newPet) 
@@ -343,12 +336,7 @@ const createPet = (petName) => {
 
   useEffect(()=> {
 
-    console.log(currentPets)
-    console.log(rawPets)
-
-  if (petsLoaded) {
-    
-    // console.log( `cooords`, loadingCoords)
+    // declare variables to be used by the drawing function. These are often updated in functions below
     let grabbing
     let hoverIndex = null
     let hoverX = null
@@ -356,51 +344,48 @@ const createPet = (petName) => {
     let grabIndex
     let grabX = null
     let grabY = null
-    let dpi = window.devicePixelRatio
+
     const mansion = document.getElementById("canvas")
     const mansionBox = mansion.getBoundingClientRect()
       const mansionWidth = mansionBox.right-mansionBox.left 
       const mansionHeight = mansionBox.bottom-mansionBox.top
       
     //scale the canvas
+    //scaling of the device that is viewing
+    let dpi = window.devicePixelRatio
     canvas.setAttribute('width', mansionWidth * dpi);
     canvas.setAttribute('height', mansionHeight * dpi);
-    
-    console.log(mansion.width, mansion.height)
+
+    // set the boundaries, sprite height, ground, and roof according to the scale of the canvas    
     let petHeight = mansion.height/10
     let petWidth = mansion.width/10
     let leftBound = petWidth
     let rightBound = mansion.width - leftBound
     let topBound = petHeight
     let bottomBound = mansion.height - topBound
-    let ground = mansion.height * 3/4
-    let roof = mansionHeight/4
+    let ground = mansion.height * 2/3
+    let roof = mansionHeight/3
 
-    // console.log(`leftBound`, leftBound)
-    // console.log(`rightBound`, rightBound)
-    // console.log(`topBound`, topBound)
-    // console.log(`bottomBound`, bottomBound,)
-    // console.log(`ground`, ground)
-    // console.log(`roof`, roof)
-    // console.log(`rawPets`, rawPets)
-    // console.log(`dpi`, dpi)
+    // create arrays to track x location and y location on the grid
     let relativeLoadingXCoords = []
     let relativeLoadingYCoords = []
-    let animatingIndex = [ false, false, false, true, false, false, false, false, false, false]
 
     if (loadingXCoords !== undefined) {
         relativeLoadingXCoords = loadingXCoords
         relativeLoadingYCoords = loadingYCoords
+
+        for (let i = 0; i < rawPets.length-loadingXCoords.length; i++ ){
+          relativeLoadingXCoords.push(mansionWidth)
+          relativeLoadingYCoords.push(mansionWidth * 1.6)
+        }
     } else {
       for (let i = 0; i < rawPets.length; i++) {
-        relativeLoadingXCoords.push(Math.floor((mansion.width * 2 / 3)/rawPets.length) * (i+1))
-        relativeLoadingYCoords.push(ground + Math.random() * petHeight - petHeight/2)
+        relativeLoadingXCoords.push((Math.floor((mansion.width * 4/5 )/rawPets.length) * (i+1)))
+        relativeLoadingYCoords.push(ground + Math.random() * petHeight - petHeight/2  + topBound)
       }
     }
-    // console.log(`relLoadingXCoords`, relativeLoadingXCoords)
-    // console.log(`relLoadingYCoords`, relativeLoadingYCoords)
-    // console.log(`rawPets`, rawPets)
 
+    // if user clicks, find the closest pet and mark it as closest. The closest pet is indexed so it can be grabbed
     mansion.addEventListener('mousedown', (e) => {
       const rect = mansion.getBoundingClientRect()
         let x = e.clientX - rect.left 
@@ -408,9 +393,6 @@ const createPet = (petName) => {
 
         x = Math.floor(x) * dpi
         y = Math.floor(y) * dpi
-        
-        console.log(`x`, x, `y`, y)        
-        // if
 
         let closest
         for (let i = 0; i < relativeLoadingXCoords.length; i++ ) {
@@ -418,10 +400,8 @@ const createPet = (petName) => {
             if (x >= relativeLoadingXCoords[i] && x - relativeLoadingXCoords[i] <= petWidth) {
               if (closest === undefined) {
                 closest = i
-                console.log(`solo`, closest) 
               } else if (x-relativeLoadingXCoords[i] < x-relativeLoadingXCoords[closest]) {
                 closest = i 
-                console.log(`close`) 
               } else {
               }
             }
@@ -430,11 +410,13 @@ const createPet = (petName) => {
           grabbing = true
           if (closest !== undefined) setSelectedPet(closest)
           grabIndex = closest
-        console.log(`closest`, grabIndex, grabbing)
     },false )
 
+    // if a user moves the mouse, find the closest pet to where it moved. 
+      // if the pet is being grabbed, match the x and y to the mouse (handled below).
+      // if the mouse is hovering over a pet, freeze the pet (handled below).
+
     mansion.addEventListener('mousemove', (e) => {
-      
       const rect = mansion.getBoundingClientRect()
       let x = e.clientX - rect.left 
       let y = e.clientY - rect.top 
@@ -448,28 +430,23 @@ const createPet = (petName) => {
             if (x >= relativeLoadingXCoords[i] && x - relativeLoadingXCoords[i] <= petWidth) {
               if (closest === undefined) {
                 closest = i
-                console.log(`solo`, closest) 
               } else if (x-relativeLoadingXCoords[i] < x-relativeLoadingXCoords[closest]) {
                 closest = i 
-                console.log(`close`) 
               } else {
               }
             }
           }
         }
-      // console.log(`closest`, hoverClosest,)
 
       if (grabbing) {
         grabX = x
         grabY = y
         hoverIndex = null
         hoverX = null
-        // console.log(`muaha`, x, `muaha`, y)
       } else if (closest !== undefined) {
         hoverIndex = closest
         hoverX = x
         hoverY = y
-        console.log(`hoverIndex`, hoverIndex)
       } else {
         hoverIndex = null
         hoverX = null
@@ -478,100 +455,157 @@ const createPet = (petName) => {
       }
     },false )
 
+    // if the user releases a click, clear grab
     mansion.addEventListener('mouseup', (e) => {
       grabbing = false
       grabIndex = null
       grabX = null
       grabY = null
-      console.log(`clearing`,)
     },false )
-    
+
+    // if the mouse leaves the window, clear grab
+    mansion.addEventListener('mouseout', (e) => {
+      grabbing = false
+      grabIndex = null
+      grabX = null
+      grabY = null
+    },false )
+
+    // declare drawing context and set out drawing specifications
     const ctx = mansion.getContext("2d")
     ctx.imageSmoothingEnabled = false
     ctx.scale(1,1)
+    ctx.clearRect(0, 0, mansion.width, mansion.height)
 
+    // store the pet IDs in state. this is used to maintain placement of the pets in the grid when one is removed
+    let newPetIdArray = []
+    rawPets.forEach((pet) => {
+      newPetIdArray.push(pet.petId)
+    })
+    setPetIdArray(newPetIdArray)
+
+    // If there are less pets than stored pet IDs, find the missing one and correct the x and y arrays
+    if (petIdArray.length > rawPets.length) {
+      console.log(`I, THE CARTESIAN REAPER, HAVE BEEN SUMMONED`, petIdArray.length, rawPets.length)
+      
+      let DEATHINDEX
+      let newPetIdArray = []
+      rawPets.forEach((pet, i) => {
+        newPetIdArray.push(pet.petId)
+      })
+
+      let newPetIdSet = new Set(newPetIdArray)
+      console.log(`WHERE ARE MY CHILDREN?`, newPetIdSet)
+
+      petIdArray.forEach((pet, i) => {
+        console.log(`HMMMM...`,pet)
+        if (!newPetIdSet.has(pet)) { 
+          DEATHINDEX = i
+          console.log(`MY CHILD, NUMBER ${pet}, HAS BEEN SENT TO ANOTHER PLANE`, DEATHINDEX)
+        }
+      })
+    
+      relativeLoadingXCoords.splice(DEATHINDEX,1)
+      relativeLoadingYCoords.splice(DEATHINDEX,1)
+      setPetIdArray(newPetIdArray)
+    }
+
+    // only begin drawing if there is pet data to begin with
+    if (rawPets.length > 0) {
+
+    // choose a random direction for pets to face on load
     const randomFacing = () => {
       let direction = Math.random() > 0.5 ? `left` : `right`
-      // console.log(direction)
       return direction
     }
 
+    // make an array of objects with all the data needed to draw and animate the images
     let petsWithImages = rawPets.map((pet, i) => {
-      
         pet.direction = randomFacing()
         pet.x = relativeLoadingXCoords[i]
         pet.y = relativeLoadingYCoords[i]
         pet.active = false
-      // console.log(`pet in map`, pet)
 
       return pet
     })
 
-    console.log(`init`)
+    console.log(`init`, petsWithImages)
 
+    // this function is called every 80 milliseconds to draw an image in 12.5 fps, nice and crunchy for the pixelart
     const drawMansion = () => {
 
+    //copy existing coordinate arrays
     let newloadingXCoords = [...relativeLoadingXCoords]
     let newloadingYCoords = [...relativeLoadingYCoords]
-
-
-
-    let randomWander = [ -1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,]
+    
+    // silly way to get a 1/15 chance that a selected pet changes direction. This makes me laugh, so its still here
+    let randomWander = [ -1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,]
     for (let i = 0; i < petsWithImages.length; i++) {
       let randomPetIndex = Math.floor(Math.random()*rawPets.length)
-      
       let randomWanderIndex = Math.floor(Math.random()*randomWander.length)
 
-      const rockClause = (i) => { return petsWithImages[i].frontHalf !== 'rock' && petsWithImages[i].backHalf !== 'rock'}
+    // if a pet is a rock, deny any direction changes
+    const rockClause = (i) => { return petsWithImages[i].frontHalf !== 'rock' && petsWithImages[i].backHalf !== 'rock'}
+    
     if (randomWander[randomWanderIndex] < 0 && rockClause(randomPetIndex)) {
-      console.log(`fired left`)  
       petsWithImages[randomPetIndex].direction = `left`
     }
     if (randomWander[randomWanderIndex] > 0 && rockClause(randomPetIndex)) {
-      console.log(`fired right`)  
       petsWithImages[randomPetIndex].direction = `right`
     }
     }
     
 
-    let runnerIndex = null // initialize a variable to select a random pet
     
-    let runnerRand = Math.random() // random roll to see if a pet starts running
-    // console.log(`runnerRand`, runnerRand)
-    
+    // set the default pet running movement to right
     let baseRunUnit = 2
-    let runnerValue = -baseRunUnit // set the default pet running movement to be 3 to the left
-    if (runnerRand < 0.2 ) { // if the random roll is less than .2
-      // console.log(`runner chosen`)
-
+    let runnerValue = baseRunUnit 
+    
+    // initialize a variable to select a random pet and a random roll to see if a pet starts running
+    let runnerIndex = null 
+    let runnerRand = Math.random() 
+    if (runnerRand < 0.2 ) {
       runnerIndex = Math.floor(Math.random()*rawPets.length) // roll a random indexed pet to be a runner
-      // console.log(`runnerIndex`, runnerIndex)
       if (petsWithImages[runnerIndex].frontHalf !== `fish` && petsWithImages[runnerIndex].backHalf !== `fish`) {
-        if (petsWithImages[runnerIndex].direction === 'right') { runnerValue = baseRunUnit } // if the pet's direction is right, have them move 3 to the right
+        if (petsWithImages[runnerIndex].direction === 'left') { runnerValue = -baseRunUnit } // if the pet's direction is left, negative x movement
         petsWithImages[runnerIndex].isRunning = true
+        petsWithImages[runnerIndex].active = true 
         petsWithImages[runnerIndex].runnerValue = runnerValue
+      } else {
+        petsWithImages[runnerIndex].isRunning = true
+        petsWithImages[runnerIndex].active = true 
+        petsWithImages[runnerIndex].runnerValue = 0
+
       }
     } 
-    // console.log(1/(petsWithImages.length) + .05)
-    if (runnerRand > 1/(petsWithImages.length) + .125) {
-      // console.log(`fired`)
+
+    // single pets never stop running without this little calculation. keeping a separate function helps me read it
+    const giveHimABreak = () => {
+      return petsWithImages.length > 1 ? 1/(petsWithImages.length) + .125 : 0.3
+    }
+
+    if (runnerRand > giveHimABreak()) {
       runnerIndex = Math.floor(Math.random()*rawPets.length)
 
       petsWithImages[runnerIndex].isRunning = false
       petsWithImages[runnerIndex].runnerValue = 0
     }
       
-      // console.log(`runnerIndex`, runnerIndex) 
-
+    // this loop performs the calculations for final pet positions
       for (let i = 0; i < petsWithImages.length; i++ ) {
-        let runner = petsWithImages[i]
-        // console.log(runner.isRunning)
+        let pet = petsWithImages[i]
 
-        if (newloadingYCoords[i] < ground && newloadingYCoords[i] > roof) {
-          console.log(`should be dropping`)
-          
+        // hovering
+        if (i === hoverIndex ) {
+          petsWithImages[i].isRunning = false
+          petsWithImages[i].runnerValue = 0
+        }
 
-          if (newloadingYCoords[i] + 40 > ground) {
+         // gravity
+         if (newloadingYCoords[i] < ground) {
+          if (newloadingYCoords[i] < roof && newloadingXCoords[i] > leftBound * 2 && newloadingXCoords[i] < rightBound - leftBound * 2){
+
+          } else if (newloadingYCoords[i] + 40 > ground) {
           newloadingYCoords[i] = ground + Math.random() * petHeight/4 - Math.random() * petHeight/4
           petsWithImages[i].y = ground + Math.random() * petHeight/4 - Math.random() * petHeight/4
           } else {
@@ -579,23 +613,21 @@ const createPet = (petName) => {
           petsWithImages[i].y = petsWithImages[i].y + 40
           }
         }
-        
 
-        if (i === hoverIndex ) {
-          petsWithImages[i].isRunning = false
-          petsWithImages[i].runnerValue = 0
-        }
-
-        if (runner.isRunning) {
-          // console.log(`runner`, runner)
+        // running
+        if (pet.isRunning) {
+          if( pet.runnerValue < 0) pet.direction = 'left'
+          if( pet.runnerValue > 0) pet.direction = 'right'
   
-          if( runner.runnerValue < 0) petsWithImages[i].direction = 'left'
-          if( runner.runnerValue > 0) petsWithImages[i].direction = 'right'
-  
-          if (runner.runnerValue < 0) runner.runnerValue = petsWithImages[i].speed * -baseRunUnit 
-          if (runner.runnerValue > 0) runner.runnerValue = petsWithImages[i].speed * baseRunUnit 
+          if (pet.runnerValue < 0) pet.runnerValue = pet.speed * -baseRunUnit 
+          if (pet.runnerValue > 0) pet.runnerValue = pet.speed * baseRunUnit 
           
-          newloadingXCoords[i] = runner.runnerValue + newloadingXCoords[i]
+          newloadingXCoords[i] = pet.runnerValue + newloadingXCoords[i]
+          // let verticalDirection = [ 0, -1, -1, 0, 1,]
+          // let verticalResult = verticalDirection[Math.floor(Math.random() * (verticalDirection.length - 1))]
+          // console.log(verticalResult, ` bruh`)
+          // const verticalRandom = baseRunUnit * verticalResult
+          // newloadingYCoords[i] = verticalRandom + newloadingYCoords[i]
           
           if (newloadingXCoords[i] < leftBound) {newloadingXCoords[i] = leftBound
             petsWithImages[i].direction = `right`
@@ -605,9 +637,11 @@ const createPet = (petName) => {
             petsWithImages[i].direction = `left`
             petsWithImages[i].runnerValue = -baseRunUnit
           }
-          petsWithImages[i].x = newloadingXCoords[i]
+          pet.x = newloadingXCoords[i]
+          // pet.y = newloadingYCoords[i]
         }
         
+        // grabbing
         if (i === grabIndex && grabX !== null) {
           console.log(`grabbing`, grabIndex, `at`, grabX, grabY )
           petsWithImages[i].isRunning = false
@@ -620,18 +654,22 @@ const createPet = (petName) => {
               if (grabY > bottomBound) grabY = bottomBound
               
               
-              petsWithImages[i].x = grabX - petWidth / 2
-              petsWithImages[i].y = grabY - petHeight / 2
+              pet.x = grabX - petWidth / 2
+              pet.y = grabY - petHeight / 2
               newloadingXCoords[i] = grabX - petWidth / 2
               newloadingYCoords[i] = grabY - petHeight / 2        
               
             }
-        
-        // console.log(`logic`, Math.abs(newloadingXCoords[i] - relativeLoadingXCoords[i]), `baseRunUnit`, baseRunUnit)
-        if (Math.abs(newloadingXCoords[i] - relativeLoadingXCoords[i]) > baseRunUnit) {
-          animatingIndex[i] = !animatingIndex[i]
+        // animation frames
+        if (Math.abs(newloadingXCoords[i] - relativeLoadingXCoords[i]) >= 1) {
+          pet.active = !pet.active
+          if (pet.active) {
+            // petsWithImages[i].y = petsWithImages[i].y - 3 
+          } else {
+            // petsWithImages[i].y = petsWithImages[i].y + 4
+          }
         } else {
-          animatingIndex[i] = false
+          pet.active = false
         }
           
       }
@@ -639,74 +677,82 @@ const createPet = (petName) => {
       if (hoverIndex !== null) {
 
         // if pet is hungry, chase the cursor
-        // console.log(`hoverX`, hoverX)
         // petsWithImages[hoverIndex].x = hoverX - petWidth / 2
         // newloadingXCoords[hoverIndex] = hoverX - petHeight / 2
         // if (hoverX > rightBound) hoverX = rightBound - petWidth / 2
         // if (hoverX < leftBound) hoverX = leftBound
-        petsWithImages[hoverIndex].x = relativeLoadingXCoords[hoverIndex]
         newloadingXCoords[hoverIndex] = relativeLoadingXCoords[hoverIndex]
       }
-
-      // console.log(newloadingXCoords)
-      // console.log(newloadingYCoords)
+      
       setLoadingXCoords(newloadingXCoords)
       setLoadingYCoords(newloadingYCoords)
       relativeLoadingXCoords = [...newloadingXCoords]
       relativeLoadingYCoords = [...newloadingYCoords]
+       
+      let finalPets = petsWithImages.map((pet) => {
+         return {
+            petName: pet.petName,
+            back0: pet.back0,
+            back1: pet.back1,
+            front0: pet.front0,
+            front1: pet.front1,
+            direction: pet.direction,
+            active: pet.active,
+            x: pet.x,
+            y: pet.y,
+         }
+      })
       
-      // console.log(`petsWithImages`, petsWithImages)
+      finalPets.sort((a, b) => a.y - b.y)
+      
       ctx.clearRect(0, 0, mansion.width, mansion.height)
-      // console.log(`cleared`)
       
-      for (let i = 0; i < petsWithImages.length ; i++ ) {
-        let pet = petsWithImages[i]
-        // console.log(`pet in draw`, pet.back0)
+      for (let i = 0; i < finalPets.length ; i++ ) {
+        let pet = finalPets[i]
+        let scalar = 1
         
         ctx.save()
-        // console.log(`new drawing`
-        if (animatingIndex[i]) {
+
+        if (pet.y < roof) scalar = 1 - (roof - pet.y)/(4 *(roof))
+        if (pet.y > ground) scalar = 1 + (pet.y - ground)/(2 *(bottomBound - ground))
+        if (pet.active) {
           if (pet.direction === 'right' && pet.back0) {
-            // console.log(pet.direction, `x`, pet.x)
-            ctx.drawImage(pet.front1, pet.x , pet.y , petWidth, petHeight)
-            ctx.drawImage(pet.back1, pet.x , pet.y , petWidth, petHeight)
+            ctx.scale(1 ,1)
+            ctx.drawImage(pet.front1, pet.x , pet.y , petWidth * scalar, petHeight * scalar)
+            ctx.drawImage(pet.back1, pet.x , pet.y , petWidth * scalar, petHeight * scalar)
           } else {
             ctx.scale(-1,1)
-            ctx.trans
-            // console.log(pet.direction, `x`, pet.x)
-            ctx.drawImage(pet.front1, -pet.x-petWidth, pet.y , petWidth, petHeight)
-            ctx.drawImage(pet.back1, -pet.x-petWidth, pet.y , petWidth, petHeight)
+            ctx.drawImage(pet.front1, -pet.x-petWidth * scalar, pet.y , petWidth * scalar, petHeight * scalar)
+            ctx.drawImage(pet.back1, -pet.x-petWidth * scalar, pet.y , petWidth * scalar, petHeight * scalar)
           }
         } else {
           if (pet.direction === 'right' && pet.back0) {
-            // console.log(pet.direction, `x`, pet.x)
-            ctx.drawImage(pet.front0, pet.x , pet.y , petWidth, petHeight)
-            ctx.drawImage(pet.back0, pet.x , pet.y , petWidth, petHeight)
+            ctx.scale(1,1)
+            ctx.drawImage(pet.front0, pet.x , pet.y , petWidth * scalar, petHeight * scalar)
+            ctx.drawImage(pet.back0, pet.x , pet.y , petWidth * scalar, petHeight * scalar)
           } else {
             ctx.scale(-1,1)
-            ctx.trans
-            // console.log(pet.direction, `x`, pet.x)
-            ctx.drawImage(pet.front0, -pet.x-petWidth, pet.y , petWidth, petHeight)
-            ctx.drawImage(pet.back0, -pet.x-petWidth, pet.y , petWidth, petHeight)
+            ctx.drawImage(pet.front0, -pet.x-petWidth * scalar, pet.y , petWidth * scalar, petHeight * scalar)
+            ctx.drawImage(pet.back0, -pet.x-petWidth * scalar, pet.y , petWidth * scalar, petHeight * scalar)
           }
         }
-        
-        
-        
+              
         ctx.restore()
       }
         
       }
       
       const intervalId = setInterval(() => {  
-      drawMansion()
+      if (rawPets.length > 0) {
+        drawMansion()
+      }
     }, 80)
 
     return () => {clearInterval(intervalId)
     }
   }
     
-}, [rawPets, setPetsLoaded])
+}, [rawPets])
 
   return (
     <div >
