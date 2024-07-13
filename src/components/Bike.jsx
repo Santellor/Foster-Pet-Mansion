@@ -338,7 +338,6 @@ export default function Bike(pet) {
       try {
         await Promise.all(medalEntries.map((entry) => axios.post('/api/post_medal', { entry })));
         const medalCheck = await axios.get(`/api/get_medals/${userId}`);
-        console.log(medalCheck.data.medals); // Assuming `medalCheck` contains relevant data
         setTimeout(() => {
           // Triathlon ending ceremony
           const canvas = document.getElementById('canvas');
