@@ -360,10 +360,10 @@ const createPet = (petName) => {
     let petHeight = mansion.height/10
     let petWidth = mansion.width/10
     let leftBound = petWidth
-    let rightBound = mansion.width - leftBound
+    let rightBound = mansion.width - leftBound - petWidth/6
     let topBound = petHeight
     let bottomBound = mansion.height - topBound
-    let ground = mansion.height * 2/3
+    let ground = mansion.height * 3.4/5
     let roof = mansionHeight/3
 
     // create arrays to track x location and y location on the grid
@@ -537,15 +537,18 @@ const createPet = (petName) => {
     //copy existing coordinate arrays
     let newloadingXCoords = [...relativeLoadingXCoords]
     let newloadingYCoords = [...relativeLoadingYCoords]
+
+    // determine if a pet is a pure-bred rock
+    const rockClause = (i) => { return petsWithImages[i].frontHalf !== 'rock' && petsWithImages[i].backHalf !== 'rock'}
+
+    // determine if a pet drowns on land
+    const fishClause = (i) => { return petsWithImages[i].frontHalf !== 'fish' && petsWithImages[i].backHalf !== 'fish'}
     
     // silly way to get a 1/15 chance that a selected pet changes direction. This makes me laugh, so its still here
     let randomWander = [ -1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,]
     for (let i = 0; i < petsWithImages.length; i++) {
       let randomPetIndex = Math.floor(Math.random()*rawPets.length)
       let randomWanderIndex = Math.floor(Math.random()*randomWander.length)
-
-    // if a pet is a rock, deny any direction changes
-    const rockClause = (i) => { return petsWithImages[i].frontHalf !== 'rock' && petsWithImages[i].backHalf !== 'rock'}
     
     if (randomWander[randomWanderIndex] < 0 && rockClause(randomPetIndex)) {
       petsWithImages[randomPetIndex].direction = `left`
@@ -566,7 +569,7 @@ const createPet = (petName) => {
     let runnerRand = Math.random() 
     if (runnerRand < 0.2 ) {
       runnerIndex = Math.floor(Math.random()*rawPets.length) // roll a random indexed pet to be a runner
-      if (petsWithImages[runnerIndex].frontHalf !== `fish` && petsWithImages[runnerIndex].backHalf !== `fish`) {
+      if (fishClause(runnerIndex)) {
         if (petsWithImages[runnerIndex].direction === 'left') { runnerValue = -baseRunUnit } // if the pet's direction is left, negative x movement
         petsWithImages[runnerIndex].isRunning = true
         petsWithImages[runnerIndex].active = true 
@@ -597,20 +600,19 @@ const createPet = (petName) => {
 
         // hovering
         if (i === hoverIndex ) {
-          petsWithImages[i].isRunning = false
-          petsWithImages[i].runnerValue = 0
+          pet.isRunning = false
+          pet.runnerValue = 0
         }
 
          // gravity
          if (newloadingYCoords[i] < ground) {
           if (newloadingYCoords[i] < roof && newloadingXCoords[i] > leftBound * 2 && newloadingXCoords[i] < rightBound - leftBound * 2){
-
-          } else if (newloadingYCoords[i] + 40 > ground) {
-          newloadingYCoords[i] = ground + Math.random() * petHeight/4 - Math.random() * petHeight/4
-          petsWithImages[i].y = ground + Math.random() * petHeight/4 - Math.random() * petHeight/4
+          } else if (newloadingYCoords[i] + petHeight / 2 > ground) {
+          newloadingYCoords[i] = ground 
+          pet.y = ground
           } else {
-          newloadingYCoords[i] = newloadingYCoords[i] + 40
-          petsWithImages[i].y = petsWithImages[i].y + 40
+          newloadingYCoords[i] = newloadingYCoords[i] + petHeight / 2
+          pet.y = pet.y + petHeight / 2
           }
         }
 
@@ -622,37 +624,36 @@ const createPet = (petName) => {
           if (pet.runnerValue < 0) pet.runnerValue = pet.speed * -baseRunUnit 
           if (pet.runnerValue > 0) pet.runnerValue = pet.speed * baseRunUnit 
           
-          newloadingXCoords[i] = pet.runnerValue + newloadingXCoords[i]
-          // let verticalDirection = [ 0, -1, -1, 0, 1,]
-          // let verticalResult = verticalDirection[Math.floor(Math.random() * (verticalDirection.length - 1))]
-          // console.log(verticalResult, ` bruh`)
-          // const verticalRandom = baseRunUnit * verticalResult
-          // newloadingYCoords[i] = verticalRandom + newloadingYCoords[i]
-          
+          newloadingXCoords[i] = pet.runnerValue + newloadingXCoords[i]          
           if (newloadingXCoords[i] < leftBound) {newloadingXCoords[i] = leftBound
-            petsWithImages[i].direction = `right`
-            petsWithImages[i].runnerValue = baseRunUnit
+            pet.direction = `right`
+            pet.runnerValue = baseRunUnit
           }
           if (newloadingXCoords[i ] > rightBound) {newloadingXCoords[i ] = rightBound
-            petsWithImages[i].direction = `left`
-            petsWithImages[i].runnerValue = -baseRunUnit
+            pet.direction = `left`
+            pet.runnerValue = -baseRunUnit
           }
           pet.x = newloadingXCoords[i]
-          // pet.y = newloadingYCoords[i]
+
+          if (fishClause(i) && rockClause(i) && newloadingYCoords[i] > topBound && newloadingYCoords[i] < bottomBound && (newloadingYCoords[i] < ground + petHeight || newloadingYCoords[i] < roof)){
+          let verticalDirection = [ 0, -1, 1, 0,]
+            let verticalResult = verticalDirection[Math.floor(Math.random() * (verticalDirection.length - 1))]
+            const verticalRandom = baseRunUnit * 3 * verticalResult
+            newloadingYCoords[i] = verticalRandom + newloadingYCoords[i]
+            pet.y = newloadingYCoords[i]}
         }
         
         // grabbing
         if (i === grabIndex && grabX !== null) {
           console.log(`grabbing`, grabIndex, `at`, grabX, grabY )
-          petsWithImages[i].isRunning = false
-          petsWithImages[i].runnerValue = 0
+          pet.isRunning = false
+          pet.runnerValue = 0
           
               if (grabX > rightBound) grabX = rightBound
               if (grabX < leftBound) grabX = leftBound
               
               if (grabY < topBound) grabY = topBound
               if (grabY > bottomBound) grabY = bottomBound
-              
               
               pet.x = grabX - petWidth / 2
               pet.y = grabY - petHeight / 2
