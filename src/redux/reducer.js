@@ -4,7 +4,9 @@ const initialState = {
     username: null,
     loggedIn: false,
     petsToRace: [],
-    timer: -1
+    timer: -1,
+    muted: false,
+    soundPlaying: false
 }
 
 export default function reducer(state = initialState, action) {
@@ -21,7 +23,8 @@ export default function reducer(state = initialState, action) {
                 ...state,
                 userId: null,
                 username: null,
-                loggedIn: false
+                loggedIn: false,
+                muted: true
             }
         case "RACE_PETS":
             return {
@@ -32,6 +35,12 @@ export default function reducer(state = initialState, action) {
             return {
                 ...state,
                 timer: action.payload
+            }
+        case "VOLUME":
+            return {
+                ...state,
+                muted: action.payload.muted,
+                soundPlaying: action.payload.soundPlaying
             }
         default:
             return state
