@@ -1,38 +1,46 @@
-import { Outlet, useNavigate } from 'react-router-dom'
-import axios from 'axios'
-
-import { useSelector, useDispatch } from 'react-redux'
-import { useState, useEffect } from 'react'
+import { Outlet, useNavigate } from 'react-router-dom';
+import axios from 'axios';
+import { useSelector, useDispatch } from 'react-redux';
+import { useState, useEffect } from 'react';
+import Settings from './components/Settings.jsx';
 
 export default function App() {
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+  const loggedIn = useSelector((state) => state.loggedIn);
+  const [isLoaded, setIsLoaded] = useState(false);
 
-  const dispatch = useDispatch()
-  const navigate = useNavigate()
-
-// global session check function
+  // Global session check function
   const sessionCheck = async () => {
-    const res = await axios.get('/api/get_session_check')
+    try {
+      const res = await axios.get('/api/get_session_check');
 
-    if (res.data.success) {
+      if (res.data.success) {
         dispatch({
-            type: "USER_AUTH",
-            payload: {
-                userId: res.data.userId,
-                username: res.data.username,
-                loggedIn: true
-            }
-        })
-    } else {
-      navigate ("/")
+          type: 'USER_AUTH',
+          payload: {
+            userId: res.data.userId,
+            username: res.data.username,
+            loggedIn: true,
+          },
+        });
+      } else {
+        navigate('/');
+      }
+    } catch (error) {
+      console.error('Error checking session:', error);
+      navigate('/');
     }
-}
+  };
 
-useEffect(() => {
-    sessionCheck()
-}, [])
+  useEffect(() => {
+    sessionCheck();
+    setIsLoaded(true);
+  }, []);
 
   return (
     <div>
+      {loggedIn && isLoaded ? <Settings /> : ""}
       <main>
         <Outlet />
       </main>
