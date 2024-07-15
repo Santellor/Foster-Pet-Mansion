@@ -26,7 +26,7 @@ export default function Register() {
     .then((res) => {
       console.log(`res`, res.data)
       if (res.data.success) {
-
+        console.log(`user created: `, res.data.userId)
         dispatch({
           type: "USER_AUTH",
           payload: res.data.userId
@@ -35,7 +35,7 @@ export default function Register() {
         setUsername("")
         setPassword("")
         setEmail("")
-        navigate("/mansion")
+        navigate("/mansion",{state:{userId: res.data.userId}})
       }
     })
   }

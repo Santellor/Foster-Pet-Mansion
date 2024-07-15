@@ -1,17 +1,21 @@
 import React, { useEffect, useState } from 'react'
-import { useDispatch } from 'react-redux'
+import { useDispatch, useSelector } from 'react-redux'
+import hybridizePets from '../utils/hybridize'
 
-const Dropdown = ({options}) => {
 
+const Dropdown = ({options, type, limit, loadPets}) => {
 
+    const userId = useSelector((state) => state.userId)
     const [selectionArray, setSelectionArray] = useState([])
     const [positionArray, setPositionArray] = useState([])
     const [optionElements, setOptionElements] = useState([])
     const [message, setMessage] = useState('')
     const [clicked, setClicked] = useState(false)
+    const [hybridizing, setHybridizing] = useState(false)
     const dispatch = useDispatch()
 
     const handleSelection = (i) => {
+
         // console.log(`fired at index: `, i )
 
         let selectionSet = new Set(selectionArray)
@@ -25,31 +29,21 @@ const Dropdown = ({options}) => {
             const newPositionArray = [...positionArray]
             newPositionArray[i] = false
             setPositionArray(newPositionArray)
-            console.log(`a`, newSelectionArray, newPositionArray)
+            // console.log(`pet already selected`, newSelectionArray, newPositionArray)
 
-        } else if (selectionArray.length < 5) {
+        } else if (selectionArray.length < limit) {
             const newSelectionArray = [...selectionArray]
-            newSelectionArray.push({
-                petId: options[i].petId,
-                petName:options[i].petName,
-                hunger:options[i].hunger,
-                speed:options[i].speed,
-                swim:options[i].swim,
-                jump:options[i].jump,
-                luck:options[i].luck,
-                frontHalf:options[i].frontHalf,
-                backHalf:options[i].backHalf,  
-            })
+            newSelectionArray.push(options[i])
             setSelectionArray(newSelectionArray)
 
             const newPositionArray = [...positionArray]
             newPositionArray[i] = true
             setPositionArray(newPositionArray)
-            console.log(`b`, newSelectionArray, newPositionArray)
+            // console.log(`not currently selected`, newSelectionArray, newPositionArray)
 
         } else {
-            console.log(`c`)
-            setMessage('You cannot have more than 5 pets race together')
+            // console.log(`too many pets`)
+            setMessage(`select up to ${limit} pets`)
         }
         
     }
@@ -75,24 +69,72 @@ const Dropdown = ({options}) => {
     }
 
     const handleSubmit = () => {
-        dispatch({
-            type: `RACE_PETS`,
-            payload: selectionArray
+        const noImages = selectionArray.map((pet) => {
+            return pet = 
+            {
+                petId:pet.petId,
+                petName:pet.petName,
+                hunger:pet.hunger,
+                hungerDefault:pet.hungerDefault,
+                speed:pet.speed,
+                swim:pet.swim,
+                jump:pet.jump,
+                luck:pet.luck,
+                frontHalf:pet.frontHalf,
+                backHalf:pet.backHalf,  
+            }
         })
-        toggleClicked(false)
+        if (type === `Race`) {
+            dispatch({
+                type: `RACE_PETS`,
+                payload: noImages
+            })
+            setMessage('')
+        }  
+        if (type === `Hybrid`) {
+            dispatch({
+                type: `HYBRID_PETS`,
+                payload: noImages
+            })
+            setMessage('')
+        }  
+            toggleClicked(false)
 
     }
 
     const selectedPetNames = selectionArray.length === 0 ? 
-        ` click to choose up to 5 pets` :
+        ` click to choose up to ${limit} pets` :
         selectionArray.map((pet, i) => {
         if (pet === undefined) pet = {petName:''}
         return pet = ` ${i + 1}) ${pet.petName}`
     })
 
+    // end the rehoming process
+const completeHybridizing = async () => {
+    await hybridizePets(selectionArray[0], selectionArray[1], userId)
+    loadPets()
+    dispatch({
+      type: `HYBRID_PETS`,
+      payload: []
+    })
+    setHybridizing(false)
+    setSelectionArray([])
+  }
+
+  const toggleHybridizing = () => {
+    const swapper = !hybridizing
+    setHybridizing(swapper)
+  }
+  
+  // manages which rehoming buttons are visible 
+  const hybridizingButtons = 
+      hybridizing? 
+        <>
+              <button onClick={completeHybridizing}> yes, i'm sure </button>
+              <button onClick={toggleHybridizing}> no, go back </button>
+        </> : <button onClick={toggleHybridizing}> hybridize </button>
+
     useEffect(() => {
-    //    console.log(`selectionArray`, selectionArray)
-    //    console.log(`positionArray`, positionArray)
        LoadOptions()
     }, [clicked, positionArray])
     
@@ -105,8 +147,13 @@ const Dropdown = ({options}) => {
             <button onClick={handleSubmit}>Submit</button>
         </div>
         ) : (
-        <div onClick={toggleClicked}>
-            Racing Pets:{selectedPetNames} 
+        <div>
+            <div onClick={toggleClicked}>
+                {type}:{selectedPetNames} 
+            </div>
+            <div>
+                {(selectionArray.length === 2 && type === 'Hybrid') ? hybridizingButtons : <></>}
+            </div>
         </div>
         )}
     </div>

@@ -1,8 +1,20 @@
+import axios from "axios";
+
 // Function to generate a new pet by hybridizing two parent pets and save it to the database
 const hybridizePets = async (parent1, parent2, userId) => {
     // Randomly select front and back halves from the parents
-    const frontHalf = Math.random() < 0.5 ? parent1.frontHalf : parent2.frontHalf;
-    const backHalf = Math.random() < 0.5 ? parent1.backHalf : parent2.backHalf;
+    // const frontHalf = Math.random() < 0.5 ? parent1.frontHalf : parent2.frontHalf;
+    // const backHalf = Math.random() < 0.5 ? parent1.backHalf : parent2.backHalf;
+
+    let frontHalf
+    let backHalf
+    if (Math.random() < 0.5) {
+        frontHalf = parent1.frontHalf 
+        backHalf = parent2.backHalf
+    } else {
+        frontHalf = parent2.frontHalf
+        backHalf = parent1.backHalf
+    }
 
     // Calculate stat ranges for the new pet
     const statRanges = {
@@ -39,16 +51,19 @@ const hybridizePets = async (parent1, parent2, userId) => {
             hungerDefault: randomHungerDefault,
             userId: userId
         }
+
+        console.log(`entry`, entry)
+        console.log(`entry`, parent1.hungerDefault, parent2.hungerDefault)
         const newPet = await axios.post('/api/post_pet',{
             entry: entry
         });
 
         //remove parents
-        await axios.delete(`/api/delete_pet/${parent1.petId}`)
-        await axios.delete(`/api/delete_pet/${parent2.petId}`)
+        // await axios.delete(`/api/delete_pet/${parent1.petId}`)
+        // await axios.delete(`/api/delete_pet/${parent2.petId}`)
 
         // Return the newly created pet object
-        return newPet;
+        // return newPet;
     } catch (error) {
         console.error('Error creating hybrid pet:', error);
         throw error; // Rethrow the error for handling in the caller function
