@@ -4,6 +4,7 @@ const initialState = {
     username: null,
     loggedIn: false,
     petsToRace: [],
+    petsToHybrid: [],
     timer: -1
 }
 
@@ -27,6 +28,11 @@ export default function reducer(state = initialState, action) {
             return {
                 ...state,
                 petsToRace: action.payload,
+            }
+        case "HYBRID_PETS":
+            return {
+                ...state,
+                petsToHybrid: action.payload,
             }
         case "TRIATHLON":
             return {

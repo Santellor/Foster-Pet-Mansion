@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useLocation, useNavigate } from 'react-router-dom'
 import axios from 'axios'
 import { useDispatch, useSelector } from 'react-redux'
 import '../mansion.css'
@@ -9,12 +9,15 @@ import Dropdown from './Dropdown'
 import PetTag from './PetTag'
 
 
+
 const Mansion = () => {
 
     const navigate = useNavigate()
+    const location = useLocation()
     const dispatch = useDispatch()
-    const userId = useSelector((state) => state.userId)
+    const userId = location.state !== null ? location.state.userId : useSelector((state) => state.userId)
     const petsToRace = useSelector((state) => state.petsToRace)
+    const petsToHybrid = useSelector((state) => state.petsToHybrid)
     const [currentPets, setCurrentPets] = useState([])
     const [selectedPet, setSelectedPet] = useState([0])
     const [rawPets, setRawPets] = useState([])
@@ -27,12 +30,10 @@ const Mansion = () => {
     // returns to the login page and clears state
     const handleLogout = async () => {
         const res = await axios.get('/api/get_logout')
-
         if (res.data.success) {
             dispatch({
                 type: "LOGOUT"
             })
-
             navigate('/')
         }
     }
@@ -57,7 +58,7 @@ const Mansion = () => {
     //this function fetches the data for all pets belonging to the logged in user from the database. It also allows the user to feed and rename pets
       //TODO a pet / brush function would go here
     const loadPets = async () => {
-        if (userId) {
+      if (userId !== null && userId !== undefined) {
             const {data} = await axios.get(`/api/get_pets/${userId}`)
             let petDataFromBackEnd = [...data.pets]
 
@@ -173,7 +174,7 @@ const Mansion = () => {
               setCurrentPets(petsInMansion)
               setPetsLoaded(true)
             })
-      }
+          }
     }
     
     const speciesOptions = [
@@ -375,8 +376,8 @@ const createPet = (petName) => {
         relativeLoadingYCoords = loadingYCoords
 
         for (let i = 0; i < rawPets.length-loadingXCoords.length; i++ ){
-          relativeLoadingXCoords.push(mansionWidth)
-          relativeLoadingYCoords.push(mansionWidth * 1.6)
+          relativeLoadingXCoords.push(mansionWidth/2 - petWidth/2)
+          relativeLoadingYCoords.push(mansionWidth/2)
         }
     } else {
       for (let i = 0; i < rawPets.length; i++) {
@@ -396,8 +397,8 @@ const createPet = (petName) => {
 
         let closest
         for (let i = 0; i < relativeLoadingXCoords.length; i++ ) {
-          if (y >= relativeLoadingYCoords[i] && y - relativeLoadingYCoords[i] <= petHeight ) {
-            if (x >= relativeLoadingXCoords[i] && x - relativeLoadingXCoords[i] <= petWidth) {
+          if (y >= relativeLoadingYCoords[i] && y - relativeLoadingYCoords[i] <= petHeight * 1.2) {
+            if (x >= relativeLoadingXCoords[i] && x - relativeLoadingXCoords[i] <= petWidth * 1.2) {
               if (closest === undefined) {
                 closest = i
               } else if (x-relativeLoadingXCoords[i] < x-relativeLoadingXCoords[closest]) {
@@ -426,8 +427,8 @@ const createPet = (petName) => {
 
       let closest
         for (let i = 0; i < relativeLoadingXCoords.length; i++ ) {
-          if (y >= relativeLoadingYCoords[i] && y - relativeLoadingYCoords[i] <= petHeight ) {
-            if (x >= relativeLoadingXCoords[i] && x - relativeLoadingXCoords[i] <= petWidth) {
+          if (y >= relativeLoadingYCoords[i] && y - relativeLoadingYCoords[i] <= petHeight * 1.2) {
+            if (x >= relativeLoadingXCoords[i] && x - relativeLoadingXCoords[i] <= petWidth * 1.2) {
               if (closest === undefined) {
                 closest = i
               } else if (x-relativeLoadingXCoords[i] < x-relativeLoadingXCoords[closest]) {
@@ -539,10 +540,10 @@ const createPet = (petName) => {
     let newloadingYCoords = [...relativeLoadingYCoords]
 
     // determine if a pet is a pure-bred rock
-    const rockClause = (i) => { return petsWithImages[i].frontHalf !== 'rock' && petsWithImages[i].backHalf !== 'rock'}
+    const rockClause = (i) => { return petsWithImages[i].frontHalf === 'rock' && petsWithImages[i].backHalf === 'rock'}
 
     // determine if a pet drowns on land
-    const fishClause = (i) => { return petsWithImages[i].frontHalf !== 'fish' && petsWithImages[i].backHalf !== 'fish'}
+    const fishClause = (i) => { return petsWithImages[i].frontHalf === 'fish' && petsWithImages[i].backHalf == 'fish'}
     
     // silly way to get a 1/15 chance that a selected pet changes direction. This makes me laugh, so its still here
     let randomWander = [ -1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,]
@@ -550,10 +551,10 @@ const createPet = (petName) => {
       let randomPetIndex = Math.floor(Math.random()*rawPets.length)
       let randomWanderIndex = Math.floor(Math.random()*randomWander.length)
     
-    if (randomWander[randomWanderIndex] < 0 && rockClause(randomPetIndex)) {
+    if (randomWander[randomWanderIndex] < 0 && petsWithImages[randomPetIndex].speed > 0) {
       petsWithImages[randomPetIndex].direction = `left`
     }
-    if (randomWander[randomWanderIndex] > 0 && rockClause(randomPetIndex)) {
+    if (randomWander[randomWanderIndex] > 0 && petsWithImages[randomPetIndex].speed > 0) {
       petsWithImages[randomPetIndex].direction = `right`
     }
     }
@@ -561,7 +562,7 @@ const createPet = (petName) => {
 
     
     // set the default pet running movement to right
-    let baseRunUnit = 2
+    let baseRunUnit = petWidth/32
     let runnerValue = baseRunUnit 
     
     // initialize a variable to select a random pet and a random roll to see if a pet starts running
@@ -569,14 +570,14 @@ const createPet = (petName) => {
     let runnerRand = Math.random() 
     if (runnerRand < 0.2 ) {
       runnerIndex = Math.floor(Math.random()*rawPets.length) // roll a random indexed pet to be a runner
-      if (fishClause(runnerIndex)) {
+      if (!fishClause(runnerIndex)) {
         if (petsWithImages[runnerIndex].direction === 'left') { runnerValue = -baseRunUnit } // if the pet's direction is left, negative x movement
         petsWithImages[runnerIndex].isRunning = true
-        petsWithImages[runnerIndex].active = true 
+        // petsWithImages[runnerIndex].active = true 
         petsWithImages[runnerIndex].runnerValue = runnerValue
       } else {
         petsWithImages[runnerIndex].isRunning = true
-        petsWithImages[runnerIndex].active = true 
+        // petsWithImages[runnerIndex].active = true 
         petsWithImages[runnerIndex].runnerValue = 0
 
       }
@@ -584,7 +585,7 @@ const createPet = (petName) => {
 
     // single pets never stop running without this little calculation. keeping a separate function helps me read it
     const giveHimABreak = () => {
-      return petsWithImages.length > 1 ? 1/(petsWithImages.length) + .125 : 0.3
+      return petsWithImages.length > 1 ? 1/(petsWithImages.length) + .125 : 0.75
     }
 
     if (runnerRand > giveHimABreak()) {
@@ -618,8 +619,8 @@ const createPet = (petName) => {
 
         // running
         if (pet.isRunning) {
-          if( pet.runnerValue < 0) pet.direction = 'left'
-          if( pet.runnerValue > 0) pet.direction = 'right'
+          if( pet.runnerValue < 0 && pet.speed > 0) pet.direction = 'left'
+          if( pet.runnerValue > 0 && pet.speed > 0) pet.direction = 'right'
   
           if (pet.runnerValue < 0) pet.runnerValue = pet.speed * -baseRunUnit 
           if (pet.runnerValue > 0) pet.runnerValue = pet.speed * baseRunUnit 
@@ -635,10 +636,10 @@ const createPet = (petName) => {
           }
           pet.x = newloadingXCoords[i]
 
-          if (fishClause(i) && rockClause(i) && newloadingYCoords[i] > topBound && newloadingYCoords[i] < bottomBound && (newloadingYCoords[i] < ground + petHeight || newloadingYCoords[i] < roof)){
+          if (!fishClause(i) && !rockClause(i) && newloadingYCoords[i] > topBound && newloadingYCoords[i] < bottomBound && (newloadingYCoords[i] < ground + petHeight || newloadingYCoords[i] < roof)){
           let verticalDirection = [ 0, -1, 1, 0,]
             let verticalResult = verticalDirection[Math.floor(Math.random() * (verticalDirection.length - 1))]
-            const verticalRandom = baseRunUnit * 3 * verticalResult
+            const verticalRandom = baseRunUnit * pet.speed/4 * verticalResult
             newloadingYCoords[i] = verticalRandom + newloadingYCoords[i]
             pet.y = newloadingYCoords[i]}
         }
@@ -662,7 +663,7 @@ const createPet = (petName) => {
               
             }
         // animation frames
-        if (Math.abs(newloadingXCoords[i] - relativeLoadingXCoords[i]) >= 1) {
+        if (Math.abs(newloadingXCoords[i] - relativeLoadingXCoords[i]) >= baseRunUnit / petWidth) {
           pet.active = !pet.active
           if (pet.active) {
             // petsWithImages[i].y = petsWithImages[i].y - 3 
@@ -693,6 +694,8 @@ const createPet = (petName) => {
       let finalPets = petsWithImages.map((pet) => {
          return {
             petName: pet.petName,
+            frontHalf: pet.frontHalf,
+            backHalf: pet.backHalf,
             back0: pet.back0,
             back1: pet.back1,
             front0: pet.front0,
@@ -709,6 +712,20 @@ const createPet = (petName) => {
       ctx.clearRect(0, 0, mansion.width, mansion.height)
       
       for (let i = 0; i < finalPets.length ; i++ ) {
+
+        const spriteYOffset = (frontHalf, backHalf) => { 
+          if (frontHalf === 'hamster' && backHalf === 'hamster') {
+            return 1/4 * petHeight
+          } else if ((frontHalf === 'parrot' && backHalf === 'parrot') || 
+                     (frontHalf === 'pigeon' && backHalf === 'pigeon') ||
+                     (frontHalf === 'rabbit'  && backHalf === 'rabbit')) {
+            return 3/16 * petHeight 
+          } else {
+            return 0
+          }
+
+        }
+
         let pet = finalPets[i]
         let scalar = 1
         
@@ -719,22 +736,22 @@ const createPet = (petName) => {
         if (pet.active) {
           if (pet.direction === 'right' && pet.back0) {
             ctx.scale(1 ,1)
-            ctx.drawImage(pet.front1, pet.x , pet.y , petWidth * scalar, petHeight * scalar)
-            ctx.drawImage(pet.back1, pet.x , pet.y , petWidth * scalar, petHeight * scalar)
+            ctx.drawImage(pet.front1, pet.x , pet.y + spriteYOffset(pet.frontHalf, pet.backHalf), petWidth * scalar, petHeight * scalar)
+            ctx.drawImage(pet.back1, pet.x , pet.y + spriteYOffset(pet.frontHalf, pet.backHalf), petWidth * scalar, petHeight * scalar)
           } else {
             ctx.scale(-1,1)
-            ctx.drawImage(pet.front1, -pet.x-petWidth * scalar, pet.y , petWidth * scalar, petHeight * scalar)
-            ctx.drawImage(pet.back1, -pet.x-petWidth * scalar, pet.y , petWidth * scalar, petHeight * scalar)
+            ctx.drawImage(pet.front1, -pet.x-petWidth * scalar, pet.y + spriteYOffset(pet.frontHalf, pet.backHalf), petWidth * scalar, petHeight * scalar)
+            ctx.drawImage(pet.back1, -pet.x-petWidth * scalar, pet.y + spriteYOffset(pet.frontHalf, pet.backHalf), petWidth * scalar, petHeight * scalar)
           }
         } else {
           if (pet.direction === 'right' && pet.back0) {
             ctx.scale(1,1)
-            ctx.drawImage(pet.front0, pet.x , pet.y , petWidth * scalar, petHeight * scalar)
-            ctx.drawImage(pet.back0, pet.x , pet.y , petWidth * scalar, petHeight * scalar)
+            ctx.drawImage(pet.front0, pet.x , pet.y + spriteYOffset(pet.frontHalf, pet.backHalf), petWidth * scalar, petHeight * scalar)
+            ctx.drawImage(pet.back0, pet.x , pet.y + spriteYOffset(pet.frontHalf, pet.backHalf), petWidth * scalar, petHeight * scalar)
           } else {
             ctx.scale(-1,1)
-            ctx.drawImage(pet.front0, -pet.x-petWidth * scalar, pet.y , petWidth * scalar, petHeight * scalar)
-            ctx.drawImage(pet.back0, -pet.x-petWidth * scalar, pet.y , petWidth * scalar, petHeight * scalar)
+            ctx.drawImage(pet.front0, -pet.x-petWidth * scalar, pet.y + spriteYOffset(pet.frontHalf, pet.backHalf), petWidth * scalar, petHeight * scalar)
+            ctx.drawImage(pet.back0, -pet.x-petWidth * scalar, pet.y + spriteYOffset(pet.frontHalf, pet.backHalf), petWidth * scalar, petHeight * scalar)
           }
         }
               
@@ -753,15 +770,15 @@ const createPet = (petName) => {
     }
   }
     
-}, [rawPets])
+}, [rawPets, setPetsLoaded])
 
   return (
     <div >
-        <div>Mansion</div>
         <button onClick={handleLogout}>log out</button>
         {rawPets.length < 10 ? <button onClick={() => createPet(`new pet`)}>adopt a pet</button> : <span> you may only have 10 pets</span>}
-        < Dropdown options = {rawPets} />
-        <button onClick={(() => navigate('/field_race'))}>race these pets!</button>
+        < Dropdown options={rawPets} type={'Race'} limit={5}/> 
+        {(petsToRace.length > 0) ? <button onClick={(() => navigate('/field_race'))}>race these pets!</button> : <span>  </span>}
+        { rawPets.length < 10 ? < Dropdown options={rawPets} type={'Hybrid'} limit={2} loadPets={loadPets}/> : <span> rehome a pet before making a hybrid </span>}
         {currentPets[selectedPet]}
         <div className='mansion-backdrop'>
             <canvas id="canvas" className='canvas'></canvas>

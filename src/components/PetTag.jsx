@@ -65,12 +65,6 @@ const PetTag = ({ pet, feedPet, renamePet, rehomePet }) => {
         <span className='needs-padding'>
             luck: {pet.luck}
         </span>
-        <span className='needs-padding'>
-            front: {pet.frontHalf}
-        </span>
-        <span className='needs-padding'>
-            back: {pet.backHalf}
-        </span>
         {rehomingButtons}
     </div>
   )
