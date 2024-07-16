@@ -1,8 +1,14 @@
-# React + Vite
+# Foster Pet Mansion
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A React based game centered around adopting cute critters!
+Your job is to get these adorable animals into loving homes.
+How will you do this? Races, races, races!
+In Foster Pet Mansion, you can play with, feed and race your pets
+in different events like running, swimming, biking and even a
+triathalon!
 
-Currently, two official plugins are available:
+Made with [React, Vite, Express, SQL, Sequelize, HTML5]
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+Credits
+    Developed by @Santellor and @koagraham
+    Music by Zazz Bossa from Pixabay
