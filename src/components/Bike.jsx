@@ -14,7 +14,7 @@ export default function Bike(pet) {
   const [raceOver, setRaceOver] = useState(false)
   const [triathlonEnded, setTriathlonEnded] = useState(false)
   const [winner, setWinner] = useState("")
-  const movementTick = 10
+  const movementTick = 80
 
   const navigate = useNavigate()
   const dispatch = useDispatch()
@@ -31,6 +31,7 @@ export default function Bike(pet) {
     const opps = []
 
     //convert pets from mansion
+    let i = 0
     for (const pet of pets) {
       const images = await getPetImages(pet)
       let yVal = grassLine
@@ -38,12 +39,12 @@ export default function Bike(pet) {
         yVal -= 40
       }
       opps.push({
-        name: pet.name,
+        name: pet.petName,
         hunger: pet.hunger,
         speed: Math.floor(Math.random() * (15 - 5 + 1)) + 5,
         luck: pet.luck,
-        x: 50 + pet.headStart,
-        y: yVal,
+        x: 50 + (pet.headStart ? pet.headStart : 0),
+        y: yVal + i*10,
         frontImages: [],
         backImages: [],
         frontAnim: 0,
@@ -57,10 +58,12 @@ export default function Bike(pet) {
         hasWon: false,
         bikeAnim: 0
       })
+      i++
     }
 
     //fill missing competitors with randomly generated pets
     if (timer < 0) {
+      let i = 0
       while (opps.length < 5) {
         const pet = generateRandomPet()
         const images = await getPetImages(pet)
@@ -70,7 +73,7 @@ export default function Bike(pet) {
           speed: Math.floor(Math.random() * (15 - 5 + 1)) + 5,
           luck: pet.luck,
           x: 50,
-          y: grassLine,
+          y: grassLine + i*10,
           frontImages: [],
           backImages: [],
           frontAnim: 0,
@@ -81,6 +84,7 @@ export default function Bike(pet) {
           backHalf: pet.backHalf,
           bikeAnim: 0
         })
+        i++
       }
     }
     setCompetitors(opps)
@@ -88,8 +92,8 @@ export default function Bike(pet) {
 
   //calculate luck -> used for skipping course
   const skipCourse = (pet, trackLength) => {
-    const unluckFactor = 23
-    const randomChanceValue = Math.floor(Math.random() * (trackLength*(unluckFactor*10))) + 1; // Random number between 1 and 1100
+    const unluckFactor = 25000 // 1000 * refresh rate of 12.5 frames per second * 2 for balance
+    const randomChanceValue = Math.floor(Math.random() * (unluckFactor)) + 1; // Random number between 1 and 25000
 
     if (randomChanceValue <= pet.luck) {
       pet.x = 1250
@@ -98,12 +102,12 @@ export default function Bike(pet) {
   }
 
   const randomMovement = (pet) => {
-    const randomNum = Math.floor(Math.random() * (100 + pet.luck)) + 1;
+    const randomNum = Math.floor(Math.random() * (120 + pet.luck)) + 1;
 
-    if (randomNum <= 90) {
-      return 0;
-    } else if (randomNum <= (100 + pet.luck)) {
+    if (randomNum > (100)) {
       return 1;
+    } else {
+      return 0;
     }
   };
 
@@ -135,6 +139,10 @@ export default function Bike(pet) {
     const canvas = document.getElementById('canvas')
     const ctx = canvas.getContext("2d");
     const canvasWidth = canvas.width;
+
+    canvas.setAttribute('width', 960 );
+    canvas.setAttribute('height', 540 );
+
     ctx.imageSmoothingEnabled = false;
 
     //generate front half images
@@ -209,7 +217,7 @@ export default function Bike(pet) {
             let { frontImages, backImages, x, y, speed } = data;
 
             if (!raceOver) {
-              x += (speed / movementTick) + (randomMovement(data) / movementTick);
+              x += (speed ) /1.5 + (randomMovement(data));
     
               if (x > canvasWidth - 64) {
                 endRace(data)
@@ -301,17 +309,17 @@ export default function Bike(pet) {
 
         competitors.forEach((data) => {
           if (data.name !== winner.name) {
-            ctx.drawImage(data.frontImages[0], data.x, data.y - 58, 64, 64);
-            ctx.drawImage(data.backImages[0], data.x, data.y - 58, 64, 64);
+            ctx.drawImage(data.frontImages[0], data.x, (data.y), 64, 64)
+            ctx.drawImage(data.backImages[0], data.x, (data.y), 64, 64)
           }
         });
 
         const image = new Image();
         image.src = '/crown.png';
         image.onload = () => {
-          ctx.drawImage(winner.frontImages[0], 600, 150, 64, 64);
-          ctx.drawImage(winner.backImages[0], 600, 150, 64, 64);
-          ctx.drawImage(image, 600, 107, 64, 64); // Draw crown after winner's avatar
+          ctx.drawImage(winner.frontImages[0], canvas.width/2, canvas.height/2, 64, 64);
+            ctx.drawImage(winner.backImages[0], canvas.width/2, canvas.height/2, 64, 64);  
+            ctx.drawImage(image, canvas.width/2, canvas.height/2 - 32, 64, 64); // Draw crown after winner's avatar
         };
       }, 1);
     }
@@ -419,14 +427,20 @@ export default function Bike(pet) {
 
   //html rendering
   return (
-      <div className={`bike-background ${timeUntilStart <= 0 && !raceOver ? 'bike-started' : ''}`}>
-          <h1 className="test">{timeUntilStart <= 0 ? "Race underway" : `Race starting in ${timeUntilStart}`}</h1>
-          <h3>{timer >= 0 ? formatTime(timer) : ""}</h3>
-          <h1>{((raceOver && timer < 0) || (raceOver && triathlonEnded)) && (
-                `${winner.name} was the winner!`
-            )}</h1>
-          <canvas id="canvas" width={1250} height={500}></canvas>
-          { raceOver ? <button onClick={toMansion}>Return to Mansion</button> : <></>}
+    <>
+      <div>
+        <h1 className="test">{timeUntilStart <= 0 ? "Race underway" : `Race starting in ${timeUntilStart}`}</h1>
+        <h3>{timer >= 0 ? formatTime(timer) : ""}</h3>
+        <h1>{((raceOver && timer < 0) || (raceOver && triathlonEnded)) && (
+          `${winner.name} was the winner!`
+        )}</h1>
       </div>
+        <div className={`bike-background ${timeUntilStart <= 0 && !raceOver ? 'bike-started' : ''}`}>
+            <canvas id="canvas" className='bike-canvas'></canvas>
+      </div>
+      <div>
+        { raceOver ? <button onClick={toMansion}>Return to Mansion</button> : <></>}
+      </div>
+    </>
   )
 }

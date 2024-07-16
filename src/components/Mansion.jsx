@@ -772,12 +772,24 @@ const createPet = (petName) => {
     
 }, [rawPets, setPetsLoaded])
 
+const startTriathlon = () => {
+  dispatch({
+    type: "TRIATHLON",
+    payload: 0
+  })
+
+  navigate('/field_race')
+}
+
   return (
     <div >
         <button onClick={handleLogout}>log out</button>
         {rawPets.length < 10 ? <button onClick={() => createPet(`new pet`)}>adopt a pet</button> : <span> you may only have 10 pets</span>}
         < Dropdown options={rawPets} type={'Race'} limit={5}/> 
-        {(petsToRace.length > 0) ? <button onClick={(() => navigate('/field_race'))}>race these pets!</button> : <span>  </span>}
+        {(petsToRace.length > 0) ? <button onClick={(() => navigate('/field_race'))}>race!</button> : <span>  </span>}
+        {(petsToRace.length > 0) ? <button onClick={(() => navigate('/ocean_race'))}>swim!</button> : <span>  </span>}
+        {(petsToRace.length > 0) ? <button onClick={(() => navigate('/forest_race'))}>bike!</button> : <span>  </span>}
+        {(petsToRace.length > 0) ? <button onClick={startTriathlon}>run the gauntlet!</button> : <span>  </span>}
         { rawPets.length < 10 ? < Dropdown options={rawPets} type={'Hybrid'} limit={2} loadPets={loadPets}/> : <span> rehome a pet before making a hybrid </span>}
         {currentPets[selectedPet]}
         <div className='mansion-backdrop'>

@@ -26,8 +26,7 @@ const Settings = () => {
     //<button onClick={toggleMute}>Turn sounds {muted ? "on" : "off"}</button>
     return (
         <div>
-            <p>Settings</p>
-            <button onClick={toggleAudio}>{soundPlaying ? "Stop" : "Play"} sound</button>
+            <button onClick={toggleAudio}>{soundPlaying ? "Stop" : "Play"} Music</button>
             {soundPlaying ? <Audio location={location} /> : ""}
         </div>
     )
