@@ -189,24 +189,46 @@ const Mansion = () => {
       `unicorn`,
       `black cat`,
     ];
-    
-    // a pseudorandom generator for species
-        // TODO assign the correct weights to the random generator; unicorn should be rare, dog should be common
-    const randomPetSpecies = () => {
-      let species =
-        speciesOptions[Math.floor(Math.random() * speciesOptions.length)];
-      return species;
+
+    // Define weights corresponding to each species option
+    const speciesWeights = {
+      dog: 20,
+      cat: 20,
+      rock: 9,
+      fish: 10,
+      hamster: 10,
+      rabbit: 10,
+      parrot: 5,
+      pigeon: 10,
+      unicorn: 1,
+      'black cat': 5,
     };
-    
+
+    // Function to generate a random pet species based on weights
+    const randomPetSpecies = () => {
+      let totalWeight = 0;
+      for (let species of speciesOptions) {
+        totalWeight += speciesWeights[species];
+      }
+      let randomNumber = Math.random() * totalWeight;
+      let cumulativeWeight = 0;
+      for (let species of speciesOptions) {
+        cumulativeWeight += speciesWeights[species];
+        if (randomNumber < cumulativeWeight) {
+          return species;
+        }
+      }
+    };
+
     // a pseudorandom generator to make a new pet, using the class defined above
     const randomPet = async (petName, species, preset) => {
-    
+
       const newPet = new pet
       newPet.petName = petName
       newPet.hunger = 90
       newPet.frontHalf = species
       newPet.backHalf = species
-      
+
       // an array containing keys to be looped over 
       const statsToBeRolled = [`hungerDefault`, `speed`, `swim`, `jump`, `luck`]
 
@@ -234,19 +256,19 @@ const Mansion = () => {
     }
 
     // calls the random pet function with the presets defined by a randomly defined species
-const createPet = (petName) => {
-    let newPetSpecies = randomPetSpecies();
-    
-    switch (newPetSpecies) {
+    const createPet = (petName) => {
+      let newPetSpecies = randomPetSpecies();
+
+      switch (newPetSpecies) {
         case `cat`:
-          return randomPet(petName,`cat`, {
+          return randomPet(petName, `cat`, {
             hungerDefault: [1, 5],
             speed: [5, 10],
             jump: [3, 10],
             swim: [1, 3],
             luck: [1, 5],
           });
-          
+
         case `rabbit`:
           return randomPet(petName, `rabbit`, {
             hungerDefault: [1, 5],
@@ -255,7 +277,7 @@ const createPet = (petName) => {
             swim: [1, 3],
             luck: [1, 5],
           });
-          
+
         case `hamster`:
           return randomPet(petName, `hamster`, {
             hungerDefault: [1, 3],
@@ -264,7 +286,7 @@ const createPet = (petName) => {
             swim: [1, 1],
             luck: [0, 0],
           });
-          
+
         case `unicorn`:
           return randomPet(petName, `unicorn`, {
             hungerDefault: [0, 0],
@@ -273,7 +295,7 @@ const createPet = (petName) => {
             swim: [5, 10],
             luck: [10, 10],
           });
-          
+
         case `parrot`:
           return randomPet(petName, `parrot`, {
             hungerDefault: [1, 10],
@@ -282,7 +304,7 @@ const createPet = (petName) => {
             swim: [0, 0],
             luck: [5, 10],
           });
-          
+
         case `pigeon`:
           return randomPet(petName, `pigeon`, {
             hungerDefault: [3, 10],
@@ -291,7 +313,7 @@ const createPet = (petName) => {
             swim: [0, 0],
             luck: [1, 1],
           });
-          
+
         case `black cat`:
           return randomPet(petName, `black cat`, {
             hungerDefault: [1, 5],
@@ -300,7 +322,7 @@ const createPet = (petName) => {
             swim: [1, 3],
             luck: [5, 10],
           });
-          
+
         case `rock`:
           return randomPet(petName, `rock`, {
             hungerDefault: [0, 0],
@@ -309,7 +331,7 @@ const createPet = (petName) => {
             swim: [0, 0],
             luck: [20, 20],
           });
-          
+
         case `fish`:
           return randomPet(petName, `fish`, {
             hungerDefault: [1, 3],
@@ -318,7 +340,7 @@ const createPet = (petName) => {
             swim: [8, 10],
             luck: [1, 5],
           });
-          
+
         default:
           return randomPet(petName, 'dog', {
             hungerDefault: [3, 10],
@@ -328,7 +350,7 @@ const createPet = (petName) => {
             luck: [1, 5],
           });
       }
-};
+    };
 
 // loads pets on initial access, and if the userId changes state with sessionCheck in App.jsx)
     useEffect(()=> {
