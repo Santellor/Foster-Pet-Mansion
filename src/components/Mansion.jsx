@@ -630,7 +630,7 @@ const createPet = (petName) => {
             pet.direction = `right`
             pet.runnerValue = baseRunUnit
           }
-          if (newloadingXCoords[i ] > rightBound) {newloadingXCoords[i ] = rightBound
+          if (newloadingXCoords[i ] > rightBound) {newloadingXCoords[i ] = rightBound - petWidth
             pet.direction = `left`
             pet.runnerValue = -baseRunUnit
           }
@@ -781,7 +781,7 @@ const createPet = (petName) => {
         { rawPets.length < 10 ? < Dropdown options={rawPets} type={'Hybrid'} limit={2} loadPets={loadPets}/> : <span> rehome a pet before making a hybrid </span>}
         {currentPets[selectedPet]}
         <div className='mansion-backdrop'>
-            <canvas id="canvas" className='canvas'></canvas>
+            <canvas id="canvas" className='mansion-canvas'></canvas>
         </div>
     </div>
   )

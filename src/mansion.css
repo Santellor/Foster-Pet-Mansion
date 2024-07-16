@@ -1,7 +1,9 @@
 .mansion-backdrop {
     flex: auto;
     justify-content: center;
-    width: 60vw;
+    width: 50vw;
+    max-height: 80vh;
+    max-width: 80vh;
     aspect-ratio: 1/1;
     background-image: url('../mansion.jpg');
     margin: 0;
@@ -11,8 +13,10 @@
     background-position: center;
 }
 
-.canvas {
-    width: 60vw;
+.mansion-canvas {
+    width: 50vw;
+    max-height: 80vh;
+    max-width: 80vh;
     aspect-ratio: 1/1; 
 }
 
