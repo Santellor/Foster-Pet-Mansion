@@ -150,5 +150,33 @@
         "createdAt": "2024-07-12T17:29:51.802Z",
         "updatedAt": "2024-07-12T17:30:38.487Z",
         "userId": 2
+    },
+    {
+        "petName": "legend",
+        "hunger": 100,
+        "hungerDefault": 0,
+        "speed": 8,
+        "swim": 6,
+        "jump": 2,
+        "luck": 7,
+        "frontHalf": "unicorn",
+        "backHalf": "fish",
+        "createdAt": "2024-07-15T19:14:12.830Z",
+        "updatedAt": "2024-07-15T21:38:36.880Z",
+        "userId": 1
+    },
+    {
+        "petName": "bingus",
+        "hunger": 100,
+        "hungerDefault": 3,
+        "speed": 9,
+        "swim": 1,
+        "jump": 4,
+        "luck": 5,
+        "frontHalf": "cat",
+        "backHalf": "black cat",
+        "createdAt": "2024-07-15T19:25:31.176Z",
+        "updatedAt": "2024-07-15T21:36:35.975Z",
+        "userId": 1
     }
 ]
