@@ -301,7 +301,7 @@ const Mansion = () => {
             hungerDefault: [1, 10],
             speed: [1, 5],
             jump: [20, 20],
-            swim: [0, 0],
+            swim: [1, 5],
             luck: [5, 10],
           });
 
@@ -310,7 +310,7 @@ const Mansion = () => {
             hungerDefault: [3, 10],
             speed: [1, 5],
             jump: [5, 10],
-            swim: [0, 0],
+            swim: [1, 5],
             luck: [1, 1],
           });
 

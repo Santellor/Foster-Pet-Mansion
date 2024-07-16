@@ -5,6 +5,7 @@ import { useNavigate } from 'react-router-dom'
 import { useSelector, useDispatch } from 'react-redux'
 import getPetImages from '../utils/getPetImages.js'
 import generateRandomPet from '../utils/genRandomPet.js'
+import fishify from '../utils/fishify.js'
 
 export default function Race(pet) {
   //variables
@@ -21,7 +22,7 @@ export default function Race(pet) {
   const timer = useSelector((state) => state.timer)
   const [competitors, setCompetitors] = useState([])
   const [isLoaded, setIsLoaded] = useState(false)
-  const [grassLine, setGrassLine] = useState((405))
+  const [grassLine, setGrassLine] = useState((450))
 
   //calculate average pet speed -> used for calculating movement on movment tick
   const averageSpeed = (pet) => {
@@ -50,13 +51,14 @@ export default function Race(pet) {
     //convert pets from mansion
     let i = 0
     for (const pet of pets) {
-      const images = await getPetImages(pet)
+      console.log(pet)
+      const images = await getPetImages(fishify(pet.frontHalf, pet.backHalf, 'race'))
       let yVal = grassLine
       if (timer >= 0) {
         yVal -= 40
       }
       opps.push({
-        name: pet.petName,
+        petName: pet.petName,
         hunger: pet.hunger,
         speed: averageSpeed(pet),
         luck: pet.luck,
@@ -84,9 +86,10 @@ export default function Race(pet) {
       let i = 0
       while (opps.length < 5) {
         const pet = generateRandomPet()
-        const images = await getPetImages(pet)
+        console.log(pet)
+        const images = await getPetImages(fishify(pet.frontHalf, pet.backHalf, 'race'))
         opps.push({
-          name: `Competitor ${(opps.length-1) + 1}`,
+          petName: `Competitor ${(opps.length-1) + 1}`,
           hunger: pet.hunger,
           speed: averageSpeed(pet),
           luck: pet.luck,
@@ -110,10 +113,10 @@ export default function Race(pet) {
       let i = 0
       while (opps.length < 8) {
         const pet = generateRandomPet()
-        const images = await getPetImages(pet)
+        const images = await getPetImages(fishify(pet.frontHalf, pet.backHalf, 'race'))
         let yVal = grassLine - 40
         opps.push({
-          name: `Competitor ${(opps.length-1) + 1}`,
+          petName: `Competitor ${(opps.length-1) + 1}`,
           speed: averageSpeed(pet),
           hunger: pet.hunger,
           luck: pet.luck,
@@ -147,7 +150,7 @@ export default function Race(pet) {
 
     // Calculate the threshold based on track length
     if (randomChanceValue <= pet.luck) {
-      pet.x = canvas.width - 64
+      pet.x = canvas.width
     }
     return randomChanceValue <= pet.luck;
   }
@@ -177,8 +180,6 @@ export default function Race(pet) {
   
 
   useEffect(() => {
-
-      // console.log(`fired`)
       const canvas = document.getElementById('canvas')
       const canvasWidth = canvas.width;
       const ctx = canvas.getContext("2d");
@@ -189,7 +190,6 @@ export default function Race(pet) {
       
       ctx.imageSmoothingEnabled = false;
 
-    console.log(canvasWidth)
       //generate front half images
       const loadFrontHalfImages = async () => {
         const promises = competitors.flatMap(data => {
@@ -232,7 +232,6 @@ export default function Race(pet) {
 
 
       const drawFrontHalfImages = (loadedFrontHalfImages) => {
-        console.log(`loadedFrontHalfImages`, loadedFrontHalfImages)
         loadedFrontHalfImages.forEach(({ frontImages, x, y }) => {
           ctx.drawImage(frontImages[0], x, y, 64, 64);
         });
@@ -240,7 +239,6 @@ export default function Race(pet) {
 
       //draw initial back half images
       const drawBackHalfImages = (loadedBackHalfImages) => {
-        console.log(`loadedBackHalfImages`, loadedBackHalfImages)
         loadedBackHalfImages.forEach(({ backImages, x, y }) => {
           ctx.drawImage(backImages[0], x, y, 64, 64);
         });
@@ -253,7 +251,6 @@ export default function Race(pet) {
   
       //render movement
       if (timeUntilStart <= 0 && !raceOver) {
-        console.log(competitors)
         const animateImages = () => {
           ctx.clearRect(0, 0, canvas.width, canvas.height)
           if (!raceOver) {
@@ -350,7 +347,7 @@ export default function Race(pet) {
           ctx.clearRect(0, 0, canvas.width, canvas.height);
 
           competitors.forEach((data) => {
-            if (data.name != winner.name) {
+            if (data.petName != winner.petName) {
               ctx.drawImage(data.frontImages[0], data.x, (data.y), 64, 64)
               ctx.drawImage(data.backImages[0], data.x, (data.y), 64, 64)
             }
@@ -367,6 +364,7 @@ export default function Race(pet) {
       }
 
       //triathlon ending
+      const canvas = document.getElementById('canvas')
       if (timer >= 0 && typeof winner.id === 'number') {
         setTimeout(() => {
           const dupedArr = competitors.map(competitor => ({
@@ -388,8 +386,8 @@ export default function Race(pet) {
             if (Number.isInteger(pet.id)) {
                 const chosen  = pet;
                 winner.headStart = (winner.x - chosen.x)
-                if (winner.headStart > 852) {
-                  winner.headStart = 852
+                if (winner.headStart > (canvas.width * (3/4))) {
+                  winner.headStart = (canvas.width * (3/4))
                 }
                 winner.hasWon = true
                 break; // Exit the loop as soon as we find a pet with an integer id
@@ -428,7 +426,7 @@ export default function Race(pet) {
       <div>
           <h1 className="test">{timeUntilStart <= 0 ? "Race underway" : `Race starting in ${timeUntilStart}`}</h1>
           <h3>{timer >= 0 ? formatTime(timer) : ""}</h3>
-          <h1>{raceOver ? `${winner.name} was the winner!`: " "}</h1>
+          <h1>{raceOver ? `${winner.petName} was the winner!`: " "}</h1>
       </div>
       <div className={`moving-background ${timeUntilStart <= 0 && !raceOver ? 'race-started' : ''}`}>
           <canvas id="canvas" className='race-canvas'></canvas>

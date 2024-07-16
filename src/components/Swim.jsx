@@ -20,7 +20,7 @@ export default function Swim(pet) {
   const petsToRace = useSelector((state) => state.petsToRace)
   const timer = useSelector((state) => state.timer)
   const [competitors, setCompetitors] = useState([])
-  const [waterLine, setWaterLine] = useState(260)
+  const [waterLine, setWaterLine] = useState(310)
 
   //calculate average pet swim -> used for calculating movement on movment tick
   const averageSwim = (pet) => {
@@ -45,7 +45,7 @@ export default function Swim(pet) {
         yVal -= 60
       }
       opps.push({
-        name: pet.petName,
+        petName: pet.petName,
         swim: pet.swim,
         luck: pet.luck,
         x: 50 + (pet.headStart ? pet.headStart : 0),
@@ -72,7 +72,7 @@ export default function Swim(pet) {
         const pet = generateRandomPet()
         const images = await getPetImages(pet)
         opps.push({
-          name: `Competitor ${(opps.length-1) + 1}`,
+          petName: `Competitor ${(opps.length-1) + 1}`,
           swim: averageSwim(pet),
           luck: pet.luck,
           x: 50,
@@ -96,9 +96,10 @@ export default function Swim(pet) {
   const skipCourse = (pet, trackLength) => {
     const unluckFactor = 25000 // 1000 * refresh rate of 12.5 frames per second * 2 for balance
     const randomChanceValue = Math.floor(Math.random() * (unluckFactor)) + 1; // Random number between 1 and 25000
+    const canvas = document.getElementById('canvas')
 
     if (randomChanceValue <= pet.luck) {
-      pet.x = 1250
+      pet.x = canvas.width
     }
     return randomChanceValue <= pet.luck;
   }
@@ -291,7 +292,7 @@ export default function Swim(pet) {
           ctx.clearRect(0, 0, canvas.width, canvas.height);
 
           competitors.forEach((data) => {
-            if (data.name != winner.name) {
+            if (data.petName != winner.petName) {
               ctx.drawImage(data.frontImages[0], data.x, (data.y), 64, 64)
               ctx.drawImage(data.backImages[0], data.x, (data.y), 64, 64)
             }
@@ -308,6 +309,7 @@ export default function Swim(pet) {
       }
 
       //triathlon ending
+      const canvas = document.getElementById('canvas')
       if (timer >= 0 && typeof winner.id === 'number') {
         setTimeout(() => {
           const dupedArr = competitors.map(competitor => ({
@@ -329,8 +331,8 @@ export default function Swim(pet) {
             if (Number.isInteger(pet.id)) {
                 const chosen  = pet;
                 winner.headStart = (winner.x - chosen.x)
-                if (winner.headStart > 852) {
-                  winner.headStart = 852
+                if (winner.headStart > (canvas.width * (3/4))) {
+                  winner.headStart = (canvas.width * (3/4))
                 }
                 if (winner.headStart < 0) {
                   winner.headStart = 0
@@ -372,7 +374,7 @@ export default function Swim(pet) {
       <div>
           <h1 className="test">{timeUntilStart <= 0 ? "Race underway" : `Race starting in ${timeUntilStart}`}</h1>
           <h3>{timer >= 0 ? formatTime(timer) : ""}</h3>
-          <h1>{raceOver ? `${winner.name} was the winner!`: " "}</h1>
+          <h1>{raceOver ? `${winner.petName} was the winner!`: " "}</h1>
       </div>
       <div className={`swim-background ${timeUntilStart <= 0 && !raceOver ? 'swim-started' : ''}`}>
           <canvas id="canvas" className='swim-canvas'></canvas>

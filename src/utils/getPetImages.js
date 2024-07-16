@@ -8,6 +8,7 @@ const checkImageExists = async (imageUrl) => {
 };
 
 function format(str) {
+    console.log(str)
     let words = str.split(/\s+/);
     let capitalizedWords = words.map(word => word.charAt(0).toUpperCase() + word.slice(1));
     let formattedStr = capitalizedWords.join('');
