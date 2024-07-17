@@ -12,6 +12,9 @@ const Audio = ({ location }) => {
     if (location.pathname === '/mansion') {
       return '/mansion.mp3';
     }
+    if (location.pathname === '/field_race' || location.pathname === '/ocean_race' || location.pathname === '/forest_race') {
+      return '/race.mp3'
+    }
     return '';
   };
 
