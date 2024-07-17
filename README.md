@@ -11,4 +11,4 @@ Made with [React, Vite, Express, SQL, Sequelize, HTML5]
 
 Credits
     Developed by @Santellor and @koagraham
-    Music by Zazz Bossa from Pixabay
+    Music by Zazz Bossa and Mike Kripak from Pixabay
