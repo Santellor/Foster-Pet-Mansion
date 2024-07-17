@@ -5,6 +5,7 @@ import { useNavigate } from 'react-router-dom'
 import { useSelector, useDispatch } from 'react-redux'
 import getPetImages from '../utils/getPetImages.js'
 import generateRandomPet from '../utils/genRandomPet.js'
+import fishify from '../utils/fishify.js'
 import axios from 'axios'
 
 export default function Bike(pet) {
@@ -23,7 +24,7 @@ export default function Bike(pet) {
   const userId = useSelector((state) => state.userId)
   const timer = useSelector((state) => state.timer)
   const [competitors, setCompetitors] = useState([])
-  const [grassLine, setGrassLine] = useState((290))
+  const [grassLine, setGrassLine] = useState((400))
   const [bikeImages, setBikeImages] = useState(([]))
 
   //convert pet data to pet object
@@ -33,13 +34,13 @@ export default function Bike(pet) {
     //convert pets from mansion
     let i = 0
     for (const pet of pets) {
-      const images = await getPetImages(pet)
+      const images = await getPetImages(fishify(pet.frontHalf, pet.backHalf, 'bike'))
       let yVal = grassLine
       if (timer >= 0) {
         yVal -= 40
       }
       opps.push({
-        name: pet.petName,
+        petName: pet.petName,
         hunger: pet.hunger,
         speed: Math.floor(Math.random() * (15 - 5 + 1)) + 5,
         luck: pet.luck,
@@ -66,9 +67,9 @@ export default function Bike(pet) {
       let i = 0
       while (opps.length < 5) {
         const pet = generateRandomPet()
-        const images = await getPetImages(pet)
+        const images = await getPetImages(fishify(pet.frontHalf, pet.backHalf, 'bike'))
         opps.push({
-          name: `Competitor ${(opps.length-1) + 1}`,
+          petName: `Competitor ${(opps.length-1) + 1}`,
           hunger: pet.hunger,
           speed: Math.floor(Math.random() * (15 - 5 + 1)) + 5,
           luck: pet.luck,
@@ -94,9 +95,10 @@ export default function Bike(pet) {
   const skipCourse = (pet, trackLength) => {
     const unluckFactor = 25000 // 1000 * refresh rate of 12.5 frames per second * 2 for balance
     const randomChanceValue = Math.floor(Math.random() * (unluckFactor)) + 1; // Random number between 1 and 25000
+    const canvas = document.getElementById('canvas')
 
     if (randomChanceValue <= pet.luck) {
-      pet.x = 1250
+      pet.x = canvas.width
     }
     return randomChanceValue <= pet.luck;
   }
@@ -308,7 +310,7 @@ export default function Bike(pet) {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
 
         competitors.forEach((data) => {
-          if (data.name !== winner.name) {
+          if (data.petName !== winner.petName) {
             ctx.drawImage(data.frontImages[0], data.x, (data.y), 64, 64)
             ctx.drawImage(data.backImages[0], data.x, (data.y), 64, 64)
           }
@@ -329,9 +331,10 @@ export default function Bike(pet) {
       setRaceOver(true);
       setWinner(winner);
       const placements = competitors.sort((pet1, pet2) => pet2.x - pet1.x);
-      console.log(placements[2])
-      console.log(placements[1])
-      console.log(placements[0])
+      dispatch({
+        type: 'RACE_PETS',
+        payload: [],
+      });
       // Give medals
       const medalEntries = [];
       if (typeof placements[0].id === "number") {
@@ -359,31 +362,31 @@ export default function Bike(pet) {
             const image = new Image();
             image.src = '/bronzePodium.png';
             image.onload = () => {
-              ctx.drawImage(placement[2].frontImages[0], 702, 126, 64, 64);
-              ctx.drawImage(placement[2].backImages[0], 702, 126, 64, 64);
-              ctx.drawImage(image, 700, 150, 64, 64);
+              ctx.drawImage(image, canvas.width / 2+64, canvas.height / 2, 64, 64);
+              ctx.drawImage(placement[2].frontImages[0], canvas.width / 2+64, canvas.height / 2-32, 64, 64);
+              ctx.drawImage(placement[2].backImages[0], canvas.width / 2+64, canvas.height / 2-32, 64, 64);
             };
 
             setTimeout(() => {
               const image = new Image();
               image.src = '/silverPodium.png';
               image.onload = () => {
-                ctx.drawImage(placement[1].frontImages[0], 502, 118, 64, 64);
-                ctx.drawImage(placement[1].backImages[0], 502, 118, 64, 64);
-                ctx.drawImage(image, 500, 150, 64, 64);
+                ctx.drawImage(image, canvas.width / 2-64, canvas.height / 2, 64, 64);
+                ctx.drawImage(placement[1].frontImages[0], canvas.width / 2-64, canvas.height / 2-32, 64, 64);
+                ctx.drawImage(placement[1].backImages[0], canvas.width / 2-64, canvas.height / 2-32, 64, 64);
               };
 
               setTimeout(() => {
                 const image = new Image();
                 image.src = '/goldPodium.png';
                 image.onload = () => {
-                  ctx.drawImage(placement[0].frontImages[0], 602, 107, 64, 64);
-                  ctx.drawImage(placement[0].backImages[0], 602, 107, 64, 64);
-                  ctx.drawImage(image, 600, 150, 64, 64);
+                  ctx.drawImage(image, canvas.width / 2, canvas.height / 2, 64, 64);                  
+                  ctx.drawImage(placement[0].frontImages[0], canvas.width / 2, canvas.height / 2-32, 64, 64);
+                  ctx.drawImage(placement[0].backImages[0], canvas.width / 2, canvas.height / 2-32, 64, 64);
                   const image2 = new Image();
                   image2.src = '/crown.png';
                   image2.onload = () => {
-                    ctx.drawImage(image2, 602, 63, 64, 64);
+                    ctx.drawImage(image2, canvas.width / 2, canvas.height / 2-64, 64, 64);
                   };
                 };
                 setTriathlonEnded(true);
@@ -432,7 +435,7 @@ export default function Bike(pet) {
         <h1 className="test">{timeUntilStart <= 0 ? "Race underway" : `Race starting in ${timeUntilStart}`}</h1>
         <h3>{timer >= 0 ? formatTime(timer) : ""}</h3>
         <h1>{((raceOver && timer < 0) || (raceOver && triathlonEnded)) && (
-          `${winner.name} was the winner!`
+          `${winner.petName} was the winner!`
         )}</h1>
       </div>
         <div className={`bike-background ${timeUntilStart <= 0 && !raceOver ? 'bike-started' : ''}`}>

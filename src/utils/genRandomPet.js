@@ -6,9 +6,9 @@ const generateRandomPet = () => {
         {name: 'fish', weight: 10, speed: [1, 10], swim: [8, 10], jump: [0, 0], luck: [1, 5]},
         {name: 'hamster', weight: 10, speed: [5, 10], swim: [1, 1], jump: [1, 1], luck: [0, 0]},
         {name: 'rabbit', weight: 10, speed: [8, 10], swim: [1, 3], jump: [8, 10], luck: [1, 5]},
-        {name: 'pigeon', weight: 10, speed: [1, 5], swim: [0, 0], jump: [15, 15], luck: [1, 1]},
+        {name: 'pigeon', weight: 10, speed: [1, 5], swim: [1, 5], jump: [15, 15], luck: [1, 1]},
         {name: 'black cat', weight: 5, speed: [5, 10], swim: [1, 3], jump: [5, 10], luck: [5, 10]},
-        {name: 'parrot', weight: 5, speed: [1, 5], swim: [0, 0], jump: [20, 20], luck: [5, 10]},
+        {name: 'parrot', weight: 5, speed: [1, 5], swim: [1, 5], jump: [20, 20], luck: [5, 10]},
         {name: 'unicorn', weight: 1, speed: [8, 10], swim: [8, 10], jump: [8, 10], luck: [10, 10]}
     ];
   
