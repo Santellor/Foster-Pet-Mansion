@@ -289,7 +289,7 @@ export default function Swim(pet) {
         setTimeout(() => {
           const canvas = document.getElementById('canvas')
           const ctx = canvas.getContext("2d");
-          ctx.clearRect(0, 0, canvas.width, canvas.height);
+          if (!raceOver) ctx.clearRect(0, 0, canvas.width, canvas.height);
 
           competitors.forEach((data) => {
             if (data.petName != winner.petName) {
@@ -331,8 +331,8 @@ export default function Swim(pet) {
             if (Number.isInteger(pet.id)) {
                 const chosen  = pet;
                 winner.headStart = (winner.x - chosen.x)
-                if (winner.headStart > (canvas.width * (3/4))) {
-                  winner.headStart = (canvas.width * (3/4))
+                if (winner.headStart > (canvas.width * (1/3))) {
+                  winner.headStart = (canvas.width * (1/3))
                 }
                 if (winner.headStart < 0) {
                   winner.headStart = 0
@@ -368,20 +368,31 @@ export default function Swim(pet) {
     navigate('/mansion')
   }
 
+  const buttonScrubber = () => {
+    return raceOver ? 'bg-primary-light' : ''
+  }
+
   //html rendering
   return (
-    <>
-      <div>
-          <h1 className="test">{timeUntilStart <= 0 ? "Race underway" : `Race starting in ${timeUntilStart}`}</h1>
-          <h3>{timer >= 0 ? formatTime(timer) : ""}</h3>
-          <h1>{raceOver ? `${winner.petName} was the winner!`: " "}</h1>
+    <div className='flex flex-col items-center'>
+      <div className='flex flex-row justify-center content-center h-[4rem] py-2 w-[100vw] text-md md:text-2xl sm:text-xl xs-lg text-primary-dark bg-secondary-light border-y-8 border-primary-light'>
+         <div>
+            {raceOver ? <h1>{winner.petName} was the winner!</h1> : <h1 className="test">{timeUntilStart <= 0 ? "Race underway" : `Race starting in ${timeUntilStart}`}</h1>}
+         </div>
+         <div className='ml-4'>
+            <h3>{timer >= 0 ? formatTime(timer) : ""}</h3>
+         </div>
       </div>
-      <div className={`swim-background ${timeUntilStart <= 0 && !raceOver ? 'swim-started' : ''}`}>
-          <canvas id="canvas" className='swim-canvas'></canvas>
+      <div className='relative'>
+        <div className={`swim-background ${timeUntilStart <= 0 && !raceOver ? 'swim-started' : ''}`}>
+            <canvas id="canvas" className='swim-canvas'></canvas>
+        </div>
+        <div className='top-1 absolute left-[50%] translate-x-[-50%] w-max flex justify-center content-center'>
+            <div className={` ${buttonScrubber()} p-0.5 ml-2 text-sm md:text-xl sm:text-lg xs-md hover:text-highlight`}>
+              { raceOver ? <button onClick={toMansion}>Return to Mansion</button> : <></>}
+            </div>
+        </div>
       </div>
-      <div>
-          { raceOver ? <button onClick={toMansion}>Return to Mansion</button> : <></>}
-      </div>
-    </>
+    </div>
   )
 }

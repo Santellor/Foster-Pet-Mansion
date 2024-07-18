@@ -50,7 +50,7 @@ const PetTag = ({ pet, feedPet, renamePet, rehomePet }) => {
     <div className='bg-neutral/75 flex flex-col items-center justify-center'> 
         {naming? 
          <div className='flex flex-col items-center justify-center w-[12vw] hover:text-highlight'> 
-                <input type='text' className='justify-self-center text-center w-[16vw]' value={changedName} onChange={(e) => setChangedName(e.target.value)}/> 
+                <input type='text' className='justify-self-center text-center w-[12vw]' value={changedName} onChange={(e) => setChangedName(e.target.value)}/> 
                 <button onClick={completeNaming}>done</button> 
          </div> 
         : 

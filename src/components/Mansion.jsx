@@ -29,7 +29,7 @@ const Mansion = () => {
     const [loadingXCoords, setLoadingXCoords] = useState()
     const [loadingYCoords, setLoadingYCoords] = useState()
     const [petsLoaded, setPetsLoaded] = useState(false)
-    const [viewToggle, setViewToggle] = useState(false)
+    const [viewToggle, setViewToggle] = useState(true)
     const [viewStats, setViewStats] = useState(false)
     const [petIdArray, setPetIdArray] = useState([])
     const [stateGrab, setStateGrab] = useState(false)
@@ -876,27 +876,46 @@ const startTriathlon = () => {
 
   }
 
+  const raceButtons = 
+  <div className='content-center w-max'>
+    <button className='self-center hover:text-highlight px-1 mx-1 bg-primary-light' onClick={(() => navigate('/field_race'))}>race!</button>
+     <button className='self-center hover:text-highlight px-1 mx-1 bg-primary-light' onClick={(() => navigate('/ocean_race'))}>swim!</button>
+    <button className='self-center hover:text-highlight px-1 mx-1 bg-primary-light' onClick={(() => navigate('/forest_race'))}>bike!</button>
+    <button className='self-center hover:text-highlight px-1 mx-1 bg-primary-light' onClick={startTriathlon}>triathlon!</button>
+  </div>
+  
+
   const mouseScrubber = () => {
     return stateGrab ? 'pointer-events-none' : ""
   }
 
   return (
     <div className='flex border-t-8 border-primary-light flex-col items-center text-primary-dark'>
-      <div className='relative flex justify-left pl-[24vw] py-2 mb-2 w-[100vw] text-sm md:text-xl sm:text-lg xs-md text-primary-dark bg-secondary-light  border-primary-dark border-b-2'>
-        <button className=' hover:text-highlight border-2 border-secondary-light hover:border-highlight px-1' onClick={toggleDropdown}>{viewToggle? `race:` : `DNA:` }</button>
+      <div className='relative flex h-[4rem] py-2 w-[100vw] text-sm md:text-xl sm:text-lg xs-md text-primary-dark bg-secondary-light z-10 border-b-8 border-primary-light'>
+        
         { viewToggle? 
-          <div className='pr-2 text-center px-2 text-sm md:text-xl sm:text-lg xs-md bg-secondary-light absolute left-[28.5%] z-40 border-primary-dark border-2'>
-          < Dropdown options={rawPets} type={'Race'} limit={5} viewToggle={viewToggle}/> 
+          <div className='flex flex-row pr-2 text-center justify-center h-10 px-2 text-sm md:text-xl sm:text-lg xs-md bg-secondary-light absolute left-[50%] translate-x-[-50%] border-primary-dark border-2 hover:border-highlight'>
+            <div className='content-center'>
+              <button className=' hover:text-highlight m-1 px-1' onClick={toggleDropdown}>racers:</button>
+            </div>
+            <div className='z-40 m-1'>
+              < Dropdown options={rawPets} type={'Race'} limit={5} viewToggle={viewToggle} raceButtons={raceButtons}/> 
+            </div>
         </div> :
-        <div className='pr-2 text-center px-2 text-sm md:text-xl sm:text-lg xs-md bg-secondary-light absolute left-[28.5%] z-40 border-primary-dark border-2 hover:border-highlight'>
-          { rawPets.length < 10 ? < Dropdown options={rawPets} type={'DNA'} limit={2} viewToggle={viewToggle} loadPets={loadPets}/> : <span> rehome a pet before splicing</span>}
+        <div className='flex flex-row pr-2 text-center justify-center h-10 px-2 text-sm md:text-xl sm:text-lg xs-md bg-secondary-light absolute left-[50%] translate-x-[-50%] border-primary-dark border-2 hover:border-highlight'>
+          <div>
+            <button className='hover:text-highlight m-1 px-1' onClick={toggleDropdown}>splice DNA</button>
+          </div>
+          <div className='z-40 m-1'>
+              { rawPets.length < 10 ? < Dropdown options={rawPets} type={'DNA'} limit={2} viewToggle={viewToggle} loadPets={loadPets}/> : <span> rehome a pet before splicing</span>}
+          </div>
         </div>
         }
         
       </div>
         <div id='mansion-backdrop' className='relative'>
             {/* <div className={`absolute top-1 left-[${canvasMidpoint}] flex justify-center content-center`}> */}
-            <div className={`absolute top-1 left-[12.5%] w-[30vw] flex justify-center content-center ${mouseScrubber()}`}>
+            <div className={`top-1 absolute left-[50%] translate-x-[-50%] w-max flex justify-center content-center ${mouseScrubber()}`}>
                 <div className='bg-primary-light p-0.5 text-sm md:text-xl sm:text-lg xs-md'>
                   {rawPets.length < 10 ? <button className=' hover:text-highlight' onClick={() => createPet(`new pet`)}>adopt a pet</button> : <span> you may only have 10 pets</span>} 
                 </div>
@@ -908,12 +927,6 @@ const startTriathlon = () => {
                 {viewStats? currentPets[selectedPet] : ''}
             </div>
             <canvas id="canvas" className='mansion-canvas'></canvas>
-        </div>
-        <div>
-          {(petsToRace.length > 0) ? <button className=' hover:text-highlight border-2 border-secondary-light hover:border-highlight px-1 m-1 bg-secondary-light' onClick={(() => navigate('/field_race'))}>race!</button> : <span>  </span>}
-          {(petsToRace.length > 0) ? <button className=' hover:text-highlight border-2 border-secondary-light hover:border-highlight px-1 m-1 bg-secondary-light' onClick={(() => navigate('/ocean_race'))}>swim!</button> : <span>  </span>}
-          {(petsToRace.length > 0) ? <button className=' hover:text-highlight border-2 border-secondary-light hover:border-highlight px-1 m-1 bg-secondary-light' onClick={(() => navigate('/forest_race'))}>bike!</button> : <span>  </span>}
-          {(petsToRace.length > 0) ? <button className=' hover:text-highlight border-2 border-secondary-light hover:border-highlight px-1 m-1 bg-secondary-light' onClick={startTriathlon}>run the gauntlet!</button> : <span>  </span>}
         </div>
     </div>
   )

@@ -3,7 +3,7 @@ import { useDispatch, useSelector } from 'react-redux'
 import hybridizePets from '../utils/hybridize'
 
 
-const Dropdown = ({options, type, limit, viewToggle, loadPets}) => {
+const Dropdown = ({options, type, limit, viewToggle, loadPets, raceButtons}) => {
 
     const userId = useSelector((state) => state.userId)
     const [selectionArray, setSelectionArray] = useState([])
@@ -130,9 +130,9 @@ const completeHybridizing = async () => {
   const hybridizingButtons = 
       hybridizing? 
         <>
-              <button className=' hover:text-highlight px-1 bg-primary-light mr-2' onClick={completeHybridizing}> yes, i'm sure </button>
-              <button className=' hover:text-highlight px-1 bg-primary-light ml-2' onClick={toggleHybridizing}> no, go back </button>
-        </> : <button className=' hover:text-highlight px-1 bg-primary-light' onClick={toggleHybridizing}> hybridize </button>
+              <button className='self-center hover:text-highlight px-1 bg-primary-light mr-2' onClick={completeHybridizing}> yes, i'm sure </button>
+              <button className='self-center hover:text-highlight px-1 bg-primary-light ml-2' onClick={toggleHybridizing}> no, go back </button>
+        </> : <button className='self-center hover:text-highlight px-1 bg-primary-light' onClick={toggleHybridizing}> hybridize </button>
 
     useEffect(() => {
        LoadOptions()
@@ -163,17 +163,18 @@ const completeHybridizing = async () => {
     <div >
         {message}
     {clicked? (
-        <div>
+        <div className=' bg-secondary-light border-2 border-primary-dark'>
             {optionElements}
             <button className=' hover:text-highlight' onClick={handleSubmit}>Done</button>
         </div>
         ) : (
         <div className='flex flex-row'>
-            <div className=' hover:text-highlight hover:cursor-pointer'onClick={toggleClicked}>
+            <div className=' hover:text-highlight item-center hover:cursor-pointer content-center w-max'onClick={toggleClicked}>
                 {selectedPetNames} 
             </div>
             <div className={`flex flex-row ml-4`}>
                 {(selectionArray.length === 2 && type === 'DNA') ? hybridizingButtons : <></>}
+                {(selectionArray.length > 0 && type === 'Race') ? raceButtons : <></>}
             </div>
         </div>
         )}

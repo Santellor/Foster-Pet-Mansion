@@ -22,7 +22,7 @@ export default function Race(pet) {
   const timer = useSelector((state) => state.timer)
   const [competitors, setCompetitors] = useState([])
   const [isLoaded, setIsLoaded] = useState(false)
-  const [grassLine, setGrassLine] = useState((450))
+  const [grassLine, setGrassLine] = useState((420))
 
   //calculate average pet speed -> used for calculating movement on movment tick
   const averageSpeed = (pet) => {
@@ -344,7 +344,7 @@ export default function Race(pet) {
         setTimeout(() => {
           const canvas = document.getElementById('canvas')
           const ctx = canvas.getContext("2d");
-          ctx.clearRect(0, 0, canvas.width, canvas.height);
+          if (!raceOver) ctx.clearRect(0, 0, canvas.width, canvas.height);
 
           competitors.forEach((data) => {
             if (data.petName != winner.petName) {
@@ -386,8 +386,8 @@ export default function Race(pet) {
             if (Number.isInteger(pet.id)) {
                 const chosen  = pet;
                 winner.headStart = (winner.x - chosen.x)
-                if (winner.headStart > (canvas.width * (3/4))) {
-                  winner.headStart = (canvas.width * (3/4))
+                if (winner.headStart > (canvas.width * (1/3))) {
+                  winner.headStart = (canvas.width * (1/3))
                 }
                 winner.hasWon = true
                 break; // Exit the loop as soon as we find a pet with an integer id
@@ -420,20 +420,31 @@ export default function Race(pet) {
     navigate('/mansion')
   }
 
+  const buttonScrubber = () => {
+    return raceOver ? 'bg-primary-light' : ''
+  }
+
   //html rendering
   return (
-    <>
-      <div>
-          <h1 className="test">{timeUntilStart <= 0 ? "Race underway" : `Race starting in ${timeUntilStart}`}</h1>
-          <h3>{timer >= 0 ? formatTime(timer) : ""}</h3>
-          <h1>{raceOver ? `${winner.petName} was the winner!`: " "}</h1>
+    <div className='flex flex-col items-center'>
+      <div className='flex flex-row justify-center content-center h-[4rem] py-2 w-[100vw] text-md md:text-2xl sm:text-xl xs-lg text-primary-dark bg-secondary-light border-y-8 border-primary-light'>
+         <div>
+            {raceOver ? <h1>{winner.petName} was the winner!</h1> : <h1 className="test">{timeUntilStart <= 0 ? "Race underway" : `Race starting in ${timeUntilStart}`}</h1>}
+         </div>
+         <div className='ml-4'>
+            <h3>{timer >= 0 ? formatTime(timer) : ""}</h3>
+         </div>
       </div>
+      <div className='relative'>
       <div className={`moving-background ${timeUntilStart <= 0 && !raceOver ? 'race-started' : ''}`}>
           <canvas id="canvas" className='race-canvas'></canvas>
       </div>
-      <div>
-          { raceOver ? <button onClick={toMansion}>Return to Mansion</button> : <></>}
+        <div className='top-1 absolute left-[50%] translate-x-[-50%] w-max flex justify-center content-center'>
+          <div className={` ${buttonScrubber()} p-0.5 ml-2 text-sm md:text-xl sm:text-lg xs-md hover:text-highlight`}>
+            { raceOver ? <button onClick={toMansion}>Return to Mansion</button> : <></>}
+          </div>
+        </div>
       </div>
-    </>
+    </div>
   )
 }
