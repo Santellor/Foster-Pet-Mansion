@@ -40,6 +40,10 @@ export default function Login() {
                     username: res.data.username
                 }
             })
+            dispatch({
+                type: "VOLUME",
+                payload: {soundPlaying: false},
+            })
 
             setUsername("")
             setPassword("")

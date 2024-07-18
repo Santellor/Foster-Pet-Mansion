@@ -390,9 +390,9 @@ export default function Bike(pet) {
                   };
                 };
                 setTriathlonEnded(true);
-              }, 2500);
-            }, 2500);
-          }, 2500);
+              }, 1500);
+            }, 1500);
+          }, 1500);
         }, 2);
       } catch (error) {
         console.error('Error handling end race:', error);

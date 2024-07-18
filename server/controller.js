@@ -64,7 +64,8 @@ const handlerFunctions = {
         res.json({
             message: 'user created',
             success: 'true',
-            userId: user.userId
+            userId: user.userId,
+            username: user.username
         })
     },
   

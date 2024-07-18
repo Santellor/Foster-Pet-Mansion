@@ -10,7 +10,7 @@ const Settings = () => {
     const dispatch = useDispatch()
     const navigate = useNavigate()
     const location = useLocation()
-    const username = location.state !== null ? location.state.username : useSelector((state) => state.username)
+    const username = useSelector((state) => state.username)
     const muted = useSelector((state) => state.muted)
     const soundPlaying = useSelector((state) => state.soundPlaying)
 
@@ -40,6 +40,7 @@ const Settings = () => {
     }
 
     //<button onClick={toggleMute}>Turn sounds {muted ? "on" : "off"}</button>
+    console.log(`locatstat`, location.state)
     return (
         <div className='flex justify-between content-center bg-primary-dark'>
             <div className=' flex justify-center content-center w-[18vw] text-md md:text-2xl sm:text-xl xs-lg text-primary dark my-2 ml-6 py-2 bg-primary-light text-primary-dark  hover:text-highlight border-2 border-primary-dark hover:border-highlight' onClick={toggleAudio}>
@@ -47,7 +48,7 @@ const Settings = () => {
                 <button >{soundPlaying ? <TbPlayerPauseFilled /> : <TbPlayerPlayFilled />} </button>
             </div>
             <div className=' invisible sm:visible content-center text-primary-light text-3xl lg:text-5xl md:text-5xl sm:text-3xl'>
-                {username}'s Mansion
+                {location.state !== null ? location.state.username : username}'s Mansion
             </div>
             {soundPlaying ? <Audio location={location} /> : ""}
             <button className=' flex justify-center content-center w-[18vw] text-md md:text-2xl sm:text-xl xs-lg text-primary dark my-2 mr-6 py-2 bg-primary-light text-primary-dark  hover:text-highlight border-2 border-primary-dark hover:border-highlight' onClick={handleLogout}>log out</button>

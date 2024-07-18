@@ -24,19 +24,21 @@ const Audio = ({ location }) => {
   // Audio file matching
   const matchAudio = () => {
     
-    if (location.pathname === '/mansion') {
-      return '/mansion.mp3';
-    }
     if ((location.pathname === '/field_race' ) || 
         (location.pathname === '/ocean_race' ) || 
         (location.pathname === '/forest_race')) {
       return '/race.mp3'
+    } else {
+      return '/mansion.mp3';
     }
-    return '';
   };
 
   useEffect(() => {
+    console.log(matchAudio())
+    console.log(soundPlaying)
+    console.log(isRacing)
     if (soundPlaying) {
+      console.log(`attempting`)
       soundRef.current = new Howl({
         src: [matchAudio()],
         autoplay: true,
