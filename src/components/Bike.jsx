@@ -24,7 +24,7 @@ export default function Bike(pet) {
   const userId = useSelector((state) => state.userId)
   const timer = useSelector((state) => state.timer)
   const [competitors, setCompetitors] = useState([])
-  const [grassLine, setGrassLine] = useState((400))
+  const [grassLine, setGrassLine] = useState((360))
   const [bikeImages, setBikeImages] = useState(([]))
 
   //convert pet data to pet object
@@ -42,7 +42,7 @@ export default function Bike(pet) {
       opps.push({
         petName: pet.petName,
         hunger: pet.hunger,
-        speed: Math.floor(Math.random() * (15 - 5 + 1)) + 5,
+        speed: Math.floor(Math.random() * (13 - 7 + 1)) + 7,
         luck: pet.luck,
         x: 50 + (pet.headStart ? pet.headStart : 0),
         y: yVal + i*10,
@@ -307,7 +307,7 @@ export default function Bike(pet) {
       setTimeout(() => {
         const canvas = document.getElementById('canvas');
         const ctx = canvas.getContext('2d');
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        if (!raceOver) ctx.clearRect(0, 0, canvas.width, canvas.height);
 
         competitors.forEach((data) => {
           if (data.petName !== winner.petName) {
@@ -363,8 +363,8 @@ export default function Bike(pet) {
             image.src = '/bronzePodium.png';
             image.onload = () => {
               ctx.drawImage(image, canvas.width / 2+64, canvas.height / 2, 64, 64);
-              ctx.drawImage(placement[2].frontImages[0], canvas.width / 2+64, canvas.height / 2-32, 64, 64);
-              ctx.drawImage(placement[2].backImages[0], canvas.width / 2+64, canvas.height / 2-32, 64, 64);
+              ctx.drawImage(placement[2].frontImages[0], canvas.width / 2+64, canvas.height / 2-24, 64, 64);
+              ctx.drawImage(placement[2].backImages[0], canvas.width / 2+64, canvas.height / 2-24, 64, 64);
             };
 
             setTimeout(() => {
@@ -425,25 +425,38 @@ export default function Bike(pet) {
   };
 
   const toMansion = () => {
+    dispatch({
+      type: "TRIATHLON",
+      payload: -1
+    })
     navigate('/mansion')
+  }
+
+  const buttonScrubber = () => {
+    return raceOver ? 'bg-primary-light' : ''
   }
 
   //html rendering
   return (
-    <>
-      <div>
-        <h1 className="test">{timeUntilStart <= 0 ? "Race underway" : `Race starting in ${timeUntilStart}`}</h1>
-        <h3>{timer >= 0 ? formatTime(timer) : ""}</h3>
-        <h1>{((raceOver && timer < 0) || (raceOver && triathlonEnded)) && (
-          `${winner.petName} was the winner!`
-        )}</h1>
+    <div className='flex flex-col items-center'>
+    <div className='flex flex-row justify-center content-center h-[4rem] py-2 w-[100vw] text-md md:text-2xl sm:text-xl xs-lg text-primary-dark bg-secondary-light border-y-8 border-primary-light'>
+         <div>
+            {triathlonEnded ? <h1>{winner.petName} was the winner!</h1> : <h1 className="test">{timeUntilStart <= 0 ? "Race underway" : `Race starting in ${timeUntilStart}`}</h1>}
+         </div>
+         <div className='ml-4'>
+            <h3>{timer >= 0 ? formatTime(timer) : ""}</h3>
+         </div>
       </div>
+    <div className='relative'>
         <div className={`bike-background ${timeUntilStart <= 0 && !raceOver ? 'bike-started' : ''}`}>
             <canvas id="canvas" className='bike-canvas'></canvas>
+            <div className='top-1 absolute left-[50%] translate-x-[-50%] w-max flex justify-center content-center'>
+            <div className={` ${buttonScrubber()} p-0.5 ml-2 text-sm md:text-xl sm:text-lg xs-md hover:text-highlight`}>
+              { raceOver ? <button onClick={toMansion}>Return to Mansion</button> : <></>}
+            </div>
+        </div>
       </div>
-      <div>
-        { raceOver ? <button onClick={toMansion}>Return to Mansion</button> : <></>}
-      </div>
-    </>
+    </div>
+    </div>
   )
 }

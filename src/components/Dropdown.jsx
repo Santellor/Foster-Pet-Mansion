@@ -3,7 +3,7 @@ import { useDispatch, useSelector } from 'react-redux'
 import hybridizePets from '../utils/hybridize'
 
 
-const Dropdown = ({options, type, limit, loadPets}) => {
+const Dropdown = ({options, type, limit, viewToggle, loadPets, raceButtons}) => {
 
     const userId = useSelector((state) => state.userId)
     const [selectionArray, setSelectionArray] = useState([])
@@ -53,10 +53,10 @@ const Dropdown = ({options, type, limit, loadPets}) => {
         // console.log(`optionElements`, optionElements)
         const loadedOptions = options.map((pet, i) => {
             return positionArray[i]? 
-                pet = <div key={i} onClick={() => handleSelection(i)}>
-                         { '-> '+pet.petName}
+                pet = <div className='text-highlight hover:cursor-pointer' key={i} onClick={() => handleSelection(i)}>
+                         { pet.petName}
                       </div> : 
-                pet = <div key={i} onClick={() => handleSelection(i)}>
+                pet = <div className='hover:text-highlight hover:cursor-pointer' key={i} onClick={() => handleSelection(i)}>
                          {pet.petName}
                       </div>
         })
@@ -91,7 +91,7 @@ const Dropdown = ({options, type, limit, loadPets}) => {
             })
             setMessage('')
         }  
-        if (type === `Hybrid`) {
+        if (type === `DNA`) {
             dispatch({
                 type: `HYBRID_PETS`,
                 payload: noImages
@@ -103,7 +103,7 @@ const Dropdown = ({options, type, limit, loadPets}) => {
     }
 
     const selectedPetNames = selectionArray.length === 0 ? 
-        ` click to choose up to ${limit} pets` :
+        `choose up to ${limit} pets` :
         selectionArray.map((pet, i) => {
         if (pet === undefined) pet = {petName:''}
         return pet = ` ${i + 1}) ${pet.petName}`
@@ -130,29 +130,51 @@ const completeHybridizing = async () => {
   const hybridizingButtons = 
       hybridizing? 
         <>
-              <button onClick={completeHybridizing}> yes, i'm sure </button>
-              <button onClick={toggleHybridizing}> no, go back </button>
-        </> : <button onClick={toggleHybridizing}> hybridize </button>
+              <button className='self-center hover:text-highlight px-1 bg-primary-light mr-2' onClick={completeHybridizing}> yes, i'm sure </button>
+              <button className='self-center hover:text-highlight px-1 bg-primary-light ml-2' onClick={toggleHybridizing}> no, go back </button>
+        </> : <button className='self-center hover:text-highlight px-1 bg-primary-light' onClick={toggleHybridizing}> hybridize </button>
 
     useEffect(() => {
        LoadOptions()
     }, [clicked, positionArray])
+
+    useEffect(() => {
+        if (clicked) {}
+        setPositionArray([])
+        setSelectionArray([])
+        dispatch({
+            type: `HYBRID_PETS`,
+            payload: []
+        })
+        dispatch({
+            type: `RACE_PETS`,
+            payload: []
+        })
+        setMessage('')
+        setClicked(false)
+        setHybridizing(false)
+    }, [viewToggle])
+
+    const buttonScrubber = () => {
+        return selectionArray.length === 2 && type === 'DNA' ? 'w-[40vw]' : ''
+      }
     
   return (
     <div >
         {message}
     {clicked? (
-        <div>
+        <div className=' bg-secondary-light border-2 border-primary-dark'>
             {optionElements}
-            <button onClick={handleSubmit}>Submit</button>
+            <button className=' hover:text-highlight' onClick={handleSubmit}>Done</button>
         </div>
         ) : (
-        <div>
-            <div onClick={toggleClicked}>
-                {type}:{selectedPetNames} 
+        <div className='flex flex-row'>
+            <div className=' hover:text-highlight item-center hover:cursor-pointer content-center w-max'onClick={toggleClicked}>
+                {selectedPetNames} 
             </div>
-            <div>
-                {(selectionArray.length === 2 && type === 'Hybrid') ? hybridizingButtons : <></>}
+            <div className={`flex flex-row ml-4`}>
+                {(selectionArray.length === 2 && type === 'DNA') ? hybridizingButtons : <></>}
+                {(selectionArray.length > 0 && type === 'Race') ? raceButtons : <></>}
             </div>
         </div>
         )}

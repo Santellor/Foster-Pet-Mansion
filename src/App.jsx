@@ -1,3 +1,4 @@
+import './index.css'
 import { Outlet, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { useSelector, useDispatch } from 'react-redux';
@@ -39,7 +40,7 @@ export default function App() {
   }, []);
 
   return (
-    <div>
+    <div id='pixelify-sans-bingus-is-the-fastest-pet' className='bg-neutral h-[100vh]'>
       {loggedIn && isLoaded ? <Settings /> : ""}
       <main>
         <Outlet />

@@ -7,6 +7,10 @@ import Pet from './Pet'
 import getPetImages from '../utils/getPetImages'
 import Dropdown from './Dropdown'
 import PetTag from './PetTag'
+import { IoIosCheckbox } from "react-icons/io";
+import { IoIosSquareOutline } from "react-icons/io";
+
+
 
 
 
@@ -19,24 +23,19 @@ const Mansion = () => {
     const petsToRace = useSelector((state) => state.petsToRace)
     const petsToHybrid = useSelector((state) => state.petsToHybrid)
     const [currentPets, setCurrentPets] = useState([])
-    const [selectedPet, setSelectedPet] = useState([0])
+    const [selectedPet, setSelectedPet] = useState()
     const [rawPets, setRawPets] = useState([])
     const [petOptions, setPetOptions] = useState([])
     const [loadingXCoords, setLoadingXCoords] = useState()
     const [loadingYCoords, setLoadingYCoords] = useState()
     const [petsLoaded, setPetsLoaded] = useState(false)
+    const [viewToggle, setViewToggle] = useState(true)
+    const [viewStats, setViewStats] = useState(false)
     const [petIdArray, setPetIdArray] = useState([])
+    const [stateGrab, setStateGrab] = useState(false)
+    const [tagX, setTagX] = useState(14)
+    const [tagY, setTagY] = useState(9)
     
-    // returns to the login page and clears state
-    const handleLogout = async () => {
-        const res = await axios.get('/api/get_logout')
-        if (res.data.success) {
-            dispatch({
-                type: "LOGOUT"
-            })
-            navigate('/')
-        }
-    }
 
     // a class for pets, currently used only for creation
     class pet {
@@ -301,7 +300,7 @@ const Mansion = () => {
             hungerDefault: [1, 10],
             speed: [1, 5],
             jump: [20, 20],
-            swim: [1, 5],
+            swim: [0, 0],
             luck: [5, 10],
           });
 
@@ -310,7 +309,7 @@ const Mansion = () => {
             hungerDefault: [3, 10],
             speed: [1, 5],
             jump: [5, 10],
-            swim: [1, 5],
+            swim: [0, 0],
             luck: [1, 1],
           });
 
@@ -423,7 +422,7 @@ const Mansion = () => {
             if (x >= relativeLoadingXCoords[i] && x - relativeLoadingXCoords[i] <= petWidth * 1.2) {
               if (closest === undefined) {
                 closest = i
-              } else if (x-relativeLoadingXCoords[i] < x-relativeLoadingXCoords[closest]) {
+              } else if ((x-relativeLoadingXCoords[i]) + (y-relativeLoadingYCoords[i]) < (x-relativeLoadingXCoords[closest]) + (y-relativeLoadingYCoords[closest]) ) {
                 closest = i 
               } else {
               }
@@ -431,7 +430,14 @@ const Mansion = () => {
           }
         }
           grabbing = true
-          if (closest !== undefined) setSelectedPet(closest)
+          if (closest !== undefined) {
+            setSelectedPet(closest)
+            let xTagRatio = Math.floor(12 * relativeLoadingXCoords[closest]/(mansion.width - leftBound * 3)) + 1
+            let yTagRatio = Math.floor(24 * relativeLoadingYCoords[closest]/(mansion.height - topBound * 3 )) // + y > mansionWidth/2 ? 4 : 0
+            setTagX(xTagRatio)
+            setTagY(yTagRatio)
+          }
+          else setSelectedPet(null)
           grabIndex = closest
     },false )
 
@@ -453,7 +459,7 @@ const Mansion = () => {
             if (x >= relativeLoadingXCoords[i] && x - relativeLoadingXCoords[i] <= petWidth * 1.2) {
               if (closest === undefined) {
                 closest = i
-              } else if (x-relativeLoadingXCoords[i] < x-relativeLoadingXCoords[closest]) {
+              } else if ((x-relativeLoadingXCoords[i]) + (y-relativeLoadingYCoords[i]) < (x-relativeLoadingXCoords[closest]) + (y-relativeLoadingYCoords[closest]) ) {
                 closest = i 
               } else {
               }
@@ -464,6 +470,7 @@ const Mansion = () => {
       if (grabbing) {
         grabX = x
         grabY = y
+        setStateGrab(true)
         hoverIndex = null
         hoverX = null
       } else if (closest !== undefined) {
@@ -475,6 +482,7 @@ const Mansion = () => {
         hoverX = null
            grabX = null
            grabY = null
+           setStateGrab(false)
       }
     },false )
 
@@ -803,18 +811,121 @@ const startTriathlon = () => {
   navigate('/field_race')
 }
 
+  const toggleDropdown = () => {
+    const swapper = !viewToggle
+    setViewToggle(swapper)
+  }
+
+  const toggleStats = () => {
+    const swapper = !viewStats
+    if (swapper) setSelectedPet()
+    setViewStats(swapper)
+  }
+
+  const tagXFrontLoader = (xPercent) => {
+
+    switch (xPercent) {
+      case 1: return  `left-[5%]`
+      case 2: return  `left-[10%]`
+      case 3: return  `left-[15%]`
+      case 4: return  `left-[20%]`
+      case 5: return  `left-[25%]`
+      case 6: return  `left-[30%]`
+      case 7: return  `left-[35%]`
+      case 8: return  `left-[40%]`
+      case 9: return  `left-[45%]`
+      case 10: return  `left-[50%]`
+      case 11: return  `left-[55%]`
+      case 12: return  `left-[60%]`
+      default: return  `left-[65%]`
+    }
+
+  }
+
+  const tagYFrontLoader = (yPercent) => {
+
+    switch (yPercent) {
+      case -4: return  `top-[10%]`
+      case -3: return  `top-[12.5%]`
+      case -2: return  `top-[15%]`
+      case -1: return  `top-[17.5%]`
+      case 0: return  `top-[20%]`
+      case 1: return  `top-[15%]`
+      case 2: return  `top-[17.5%]`
+      case 3: return  `top-[22.5%]`
+      case 4: return  `top-[25%]`
+      case 5: return  `top-[32.5%]`
+      case 6: return  `top-[35%]`
+      case 7: return  `top-[37.5%]`
+      case 8: return  `top-[40%]`
+      case 9: return  `top-[10%]`
+      case 10: return  `top-[12.5%]`
+      case 11: return  `top-[15%]`
+      case 12: return  `top-[17.5%]`
+      case 13: return  `top-[20%]`
+      case 22: return  `top-[25%]`
+      case 23: return  `top-[35%]`
+      case 24: return  `top-[40%]`
+      case 25: return  `top-[45%]`
+      case 26: return  `top-[47.5%]`
+      case 27: return  `top-[50%]`
+      case 28: return  `top-[52.5%]`
+      case 29: return  `top-[55%]`
+      default: return  `top-[25%]`
+    }
+
+  }
+
+  const raceButtons = 
+  <div className='content-center w-max'>
+    <button className='self-center hover:text-highlight px-1 mx-1 bg-primary-light' onClick={(() => navigate('/field_race'))}>race!</button>
+     <button className='self-center hover:text-highlight px-1 mx-1 bg-primary-light' onClick={(() => navigate('/ocean_race'))}>swim!</button>
+    <button className='self-center hover:text-highlight px-1 mx-1 bg-primary-light' onClick={(() => navigate('/forest_race'))}>bike!</button>
+    <button className='self-center hover:text-highlight px-1 mx-1 bg-primary-light' onClick={startTriathlon}>triathlon!</button>
+  </div>
+  
+
+  const mouseScrubber = () => {
+    return stateGrab ? 'pointer-events-none' : ""
+  }
+
   return (
-    <div >
-        <button onClick={handleLogout}>log out</button>
-        {rawPets.length < 10 ? <button onClick={() => createPet(`new pet`)}>adopt a pet</button> : <span> you may only have 10 pets</span>}
-        < Dropdown options={rawPets} type={'Race'} limit={5}/> 
-        {(petsToRace.length > 0) ? <button onClick={(() => navigate('/field_race'))}>race!</button> : <span>  </span>}
-        {(petsToRace.length > 0) ? <button onClick={(() => navigate('/ocean_race'))}>swim!</button> : <span>  </span>}
-        {(petsToRace.length > 0) ? <button onClick={(() => navigate('/forest_race'))}>bike!</button> : <span>  </span>}
-        {(petsToRace.length > 0) ? <button onClick={startTriathlon}>run the gauntlet!</button> : <span>  </span>}
-        { rawPets.length < 10 ? < Dropdown options={rawPets} type={'Hybrid'} limit={2} loadPets={loadPets}/> : <span> rehome a pet before making a hybrid </span>}
-        {currentPets[selectedPet]}
-        <div className='mansion-backdrop'>
+    <div className='flex border-t-8 border-primary-light flex-col items-center text-primary-dark'>
+      <div className='relative flex h-[4rem] py-2 w-[100vw] text-sm md:text-xl sm:text-lg xs-md text-primary-dark bg-secondary-light z-10 border-b-8 border-primary-light'>
+        
+        { viewToggle? 
+          <div className='flex flex-row pr-2 text-center justify-center h-10 px-2 text-sm md:text-xl sm:text-lg xs-md bg-secondary-light absolute left-[50%] translate-x-[-50%] border-primary-dark border-2 hover:border-highlight'>
+            <div className='content-center'>
+              <button className=' hover:text-highlight m-1 px-1' onClick={toggleDropdown}>racers:</button>
+            </div>
+            <div className='z-40 m-1'>
+              < Dropdown options={rawPets} type={'Race'} limit={5} viewToggle={viewToggle} raceButtons={raceButtons}/> 
+            </div>
+        </div> :
+        <div className='flex flex-row pr-2 text-center justify-center h-10 px-2 text-sm md:text-xl sm:text-lg xs-md bg-secondary-light absolute left-[50%] translate-x-[-50%] border-primary-dark border-2 hover:border-highlight'>
+          <div>
+            <button className='hover:text-highlight m-1 px-1' onClick={toggleDropdown}>splice DNA</button>
+          </div>
+          <div className='z-40 m-1'>
+              { rawPets.length < 10 ? < Dropdown options={rawPets} type={'DNA'} limit={2} viewToggle={viewToggle} loadPets={loadPets}/> : <span> rehome a pet before splicing</span>}
+          </div>
+        </div>
+        }
+        
+      </div>
+        <div id='mansion-backdrop' className='relative'>
+            {/* <div className={`absolute top-1 left-[${canvasMidpoint}] flex justify-center content-center`}> */}
+            <div className={`top-1 absolute left-[50%] translate-x-[-50%] w-max flex justify-center content-center ${mouseScrubber()}`}>
+                <div className='bg-primary-light p-0.5 text-sm md:text-xl sm:text-lg xs-md'>
+                  {rawPets.length < 10 ? <button className=' hover:text-highlight' onClick={() => createPet(`new pet`)}>adopt a pet</button> : <span> you may only have 10 pets</span>} 
+                </div>
+                <div className='bg-primary-light p-0.5 ml-2 text-sm md:text-xl sm:text-lg xs-md'>
+                  <button  className=' text-xl hover:text-highlight' onClick={toggleStats}> {viewStats? `stats` : `no stats` }</button>
+                </div>
+            </div>
+            <div className={`absolute ${tagYFrontLoader(tagY)} ${tagXFrontLoader(tagX)} flex justify-center content-center ${mouseScrubber()}`}>
+                {viewStats? currentPets[selectedPet] : ''}
+            </div>
             <canvas id="canvas" className='mansion-canvas'></canvas>
         </div>
     </div>

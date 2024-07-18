@@ -1,6 +1,6 @@
 .bike-background {
     position: relative;
-    width: 90vw;
+    width: 75vw;
     aspect-ratio: 16/9;
     margin: 0;
     padding: 0;
@@ -10,7 +10,7 @@
 }
 
 .bike-canvas {
-    width: 90vw;
+    width: 75vw;
     aspect-ratio: 16/9;
 }
 
