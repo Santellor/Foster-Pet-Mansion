@@ -42,36 +42,38 @@ const PetTag = ({ pet, feedPet, renamePet, rehomePet }) => {
     const rehomingButtons = 
         rehoming? 
           <>
-                <button className='hover:text-highlight hover:bg-secondary-light/80 hover:text-center hover:justify-center hover:w-[12vw]' onClick={completeRehoming}> yes, i'm sure </button>
-                <button className='hover:text-highlight hover:bg-secondary-light/80 hover:text-center hover:justify-center hover:w-[12vw]' onClick={toggleRehoming}> no, go back </button>
-          </> : <button className='hover:text-highlight hover:bg-secondary-light/80 hover:text-center hover:justify-center hover:w-[12vw]'onClick={toggleRehoming}> rehome </button>
+                <button className='hover:text-highlight hover:bg-secondary-light/80 hover:text-center hover:justify-center' onClick={completeRehoming}> yes, i'm sure </button>
+                <button className='hover:text-highlight hover:bg-secondary-light/80 hover:text-center hover:justify-center' onClick={toggleRehoming}> no, go back </button>
+          </> : <button className='hover:text-highlight hover:bg-secondary-light/80 hover:text-center hover:justify-center'onClick={toggleRehoming}> rehome </button>
 
   return (
     <div className='bg-neutral/75 flex flex-col items-center justify-center'> 
         {naming? 
-         <div className='flex flex-col items-center justify-center w-[12vw] hover:text-highlight'> 
-                <input type='text' className='justify-self-center text-center w-[12vw]' value={changedName} onChange={(e) => setChangedName(e.target.value)}/> 
-                <button onClick={completeNaming}>done</button> 
+         <div className='flex flex-col items-center justify-center w-[8vw]'> 
+                <input type='text' className='justify-self-center text-center w-[8vw] hover:text-highlight' value={changedName} onChange={(e) => setChangedName(e.target.value)}/> 
+                <div className=' hover:text-highlight'>
+                    <button onClick={completeNaming}>done</button> 
+                </div>
          </div> 
         : 
-         <div className='hover:text-highlight hover:bg-secondary-light/80 font-bold bg-secondary-light/75 py-1 text-center justify-center w-[12vw]' onClick={startNaming}>
+         <div className='hover:text-highlight hover:bg-secondary-light/80 font-bold bg-secondary-light/75 p-1 text-center justify-center min-w-20 w-auto' onClick={startNaming}>
                 {pet.petName}   
          </div>
         }
             
-        <div className='hover:text-highlight hover:bg-secondary-light/80 hover:text-center hover:justify-center hover:w-[12vw]' onClick={() => feedPet(callbackId, callbackHunger)}>
+        <div className='hover:text-highlight hover:bg-secondary-light/80 hover:text-center hover:justify-center' onClick={() => feedPet(callbackId, callbackHunger)}>
             <button>feed: </button> {pet.hunger}
         </div>
-        <div className='needs-padding'>
+        <div className='px-2'>
             speed: {pet.speed}
         </div>
-        <div className='needs-padding'>
+        <div className='px-2'>
             swim: {pet.swim}
         </div>
-        <div className='needs-padding'>
+        <div className='px-2'>
             jump: {pet.jump}
         </div>
-        <div className='needs-padding'>
+        <div className='px-2'>
             luck: {pet.luck}
         </div>
         {rehomingButtons}

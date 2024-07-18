@@ -1,18 +1,35 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { Howl } from 'howler';
 import { useSelector } from 'react-redux';
 
 const Audio = ({ location }) => {
   const muted = useSelector((state) => state.muted);
   const soundPlaying = useSelector((state) => state.soundPlaying);
+  const [isRacing, setIsRacing] = useState(false)
   const soundRef = useRef(null); // Ref to hold the Howl instance
+
+  // 
+  const locationHandler = () => {
+    if (location.pathname !== '/mansion') {
+      setIsRacing(true)
+    } else {
+      setIsRacing(false)
+    }
+  }
+
+  useEffect(() => {
+    locationHandler()
+  }, [location.pathname])
 
   // Audio file matching
   const matchAudio = () => {
+    
     if (location.pathname === '/mansion') {
       return '/mansion.mp3';
     }
-    if (location.pathname === '/field_race' || location.pathname === '/ocean_race' || location.pathname === '/forest_race') {
+    if ((location.pathname === '/field_race' ) || 
+        (location.pathname === '/ocean_race' ) || 
+        (location.pathname === '/forest_race')) {
       return '/race.mp3'
     }
     return '';
@@ -41,7 +58,7 @@ const Audio = ({ location }) => {
         soundRef.current.unload();
       }
     };
-  }, [location.pathname, muted, soundPlaying]);
+  }, [isRacing, muted, soundPlaying]);
 
   const togglePlay = () => {
     if (soundRef.current) {

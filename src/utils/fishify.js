@@ -1,6 +1,4 @@
 const fishify = (front, back, event) => {
-    console.log(front)
-    console.log(back)
     if (event === 'race') {
         if (front === 'fish' && back === 'fish') {
             return {frontHalf: 'fish car', backHalf: 'fish car'}

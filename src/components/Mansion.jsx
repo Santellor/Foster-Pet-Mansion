@@ -432,7 +432,7 @@ const Mansion = () => {
           grabbing = true
           if (closest !== undefined) {
             setSelectedPet(closest)
-            let xTagRatio = Math.floor(12 * relativeLoadingXCoords[closest]/(mansion.width - leftBound * 3)) + 1
+            let xTagRatio = Math.floor(14 * relativeLoadingXCoords[closest]/(mansion.width - leftBound * 3))
             let yTagRatio = Math.floor(24 * relativeLoadingYCoords[closest]/(mansion.height - topBound * 3 )) // + y > mansionWidth/2 ? 4 : 0
             setTagX(xTagRatio)
             setTagY(yTagRatio)
@@ -825,19 +825,23 @@ const startTriathlon = () => {
   const tagXFrontLoader = (xPercent) => {
 
     switch (xPercent) {
-      case 1: return  `left-[5%]`
-      case 2: return  `left-[10%]`
-      case 3: return  `left-[15%]`
-      case 4: return  `left-[20%]`
-      case 5: return  `left-[25%]`
-      case 6: return  `left-[30%]`
-      case 7: return  `left-[35%]`
-      case 8: return  `left-[40%]`
-      case 9: return  `left-[45%]`
-      case 10: return  `left-[50%]`
-      case 11: return  `left-[55%]`
-      case 12: return  `left-[60%]`
-      default: return  `left-[65%]`
+      case 1: return  `left-[10%]`
+      case 2: return  `left-[15%]`
+      case 3: return  `left-[20%]`
+      case 4: return  `left-[25%]`
+      case 5: return  `left-[30%]`
+      case 6: return  `left-[35%]`
+      case 7: return  `left-[40%]`
+      case 8: return  `left-[45%]`
+      case 9: return  `left-[50%]`
+      case 10: return  `left-[55%]`
+      case 11: return  `left-[60%]`
+      case 12: return  `left-[65%]`
+      case 13: return  `left-[70%]`
+      case 14: return  `left-[75%]`
+      case 15: return  `left-[80%]`
+      case 16: return  `left-[85%]`
+      default: return  `left-[90%]`
     }
 
   }
@@ -892,7 +896,6 @@ const startTriathlon = () => {
   return (
     <div className='flex border-t-8 border-primary-light flex-col items-center text-primary-dark'>
       <div className='relative flex h-[4rem] py-2 w-[100vw] text-sm md:text-xl sm:text-lg xs-md text-primary-dark bg-secondary-light z-10 border-b-8 border-primary-light'>
-        
         { viewToggle? 
           <div className='flex flex-row pr-2 text-center justify-center h-10 px-2 text-sm md:text-xl sm:text-lg xs-md bg-secondary-light absolute left-[50%] translate-x-[-50%] border-primary-dark border-2 hover:border-highlight'>
             <div className='content-center'>
@@ -923,7 +926,7 @@ const startTriathlon = () => {
                   <button  className=' text-xl hover:text-highlight' onClick={toggleStats}> {viewStats? `stats` : `no stats` }</button>
                 </div>
             </div>
-            <div className={`absolute ${tagYFrontLoader(tagY)} ${tagXFrontLoader(tagX)} flex justify-center content-center ${mouseScrubber()}`}>
+            <div className={`absolute ${tagYFrontLoader(tagY)} ${tagXFrontLoader(tagX)} translate-x-[-50%] flex justify-center content-center ${mouseScrubber()}`}>
                 {viewStats? currentPets[selectedPet] : ''}
             </div>
             <canvas id="canvas" className='mansion-canvas'></canvas>
