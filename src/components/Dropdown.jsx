@@ -119,6 +119,7 @@ const completeHybridizing = async () => {
     })
     setHybridizing(false)
     setSelectionArray([])
+    setPositionArray([])
   }
 
   const toggleHybridizing = () => {
@@ -130,8 +131,8 @@ const completeHybridizing = async () => {
   const hybridizingButtons = 
       hybridizing? 
         <>
-              <button className='self-center hover:text-highlight px-1 bg-primary-light mr-2' onClick={completeHybridizing}> yes, i'm sure </button>
-              <button className='self-center hover:text-highlight px-1 bg-primary-light ml-2' onClick={toggleHybridizing}> no, go back </button>
+              <button className='self-center hover:text-highlight px-1 bg-primary-light mr-2' onClick={completeHybridizing}> confirm </button>
+              <button className='self-center hover:text-highlight px-1 bg-primary-light ml-2' onClick={toggleHybridizing}> back </button>
         </> : <button className='self-center hover:text-highlight px-1 bg-primary-light' onClick={toggleHybridizing}> hybridize </button>
 
     useEffect(() => {
